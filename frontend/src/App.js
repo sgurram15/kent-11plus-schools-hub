@@ -1,51 +1,1052 @@
-import { useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
+// Navigation Component
+const Navigation = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
+    <nav className="sticky top-0 z-50 w-full border-b border-stone-200/60 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <span className="font-heading text-xl font-bold text-stone-900">Kent 11+</span>
+          </Link>
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-home">
+              Home
+            </Link>
+            <Link to="/schools" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-schools">
+              Schools
+            </Link>
+            <Link to="/compare" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-compare">
+              Compare
+            </Link>
+            <Link to="/exam-info" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-exam-info">
+              Exam Info
+            </Link>
+          </div>
+          
+          {/* Mobile menu button */}
+          <button 
+            className="md:hidden p-2 text-stone-600 hover:text-primary"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            data-testid="mobile-menu-btn"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </div>
+        
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-stone-200">
+            <div className="flex flex-col gap-4">
+              <Link to="/" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Home
+              </Link>
+              <Link to="/schools" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Schools
+              </Link>
+              <Link to="/compare" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Compare
+              </Link>
+              <Link to="/exam-info" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Exam Info
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+// Footer Component
+const Footer = () => (
+  <footer className="bg-stone-900 text-stone-400 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="col-span-1 md:col-span-2">
+          <div className="flex items-center gap-2 mb-4">
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <span className="font-heading text-xl font-bold text-white">Kent 11+ Hub</span>
+          </div>
+          <p className="text-stone-400 max-w-md">
+            Your comprehensive guide to Kent grammar schools and 11+ admissions. Helping parents and students navigate the journey to academic excellence.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-heading font-semibold text-white mb-4">Quick Links</h4>
+          <ul className="space-y-2">
+            <li><Link to="/schools" className="hover:text-white transition-colors">All Schools</Link></li>
+            <li><Link to="/compare" className="hover:text-white transition-colors">Compare Schools</Link></li>
+            <li><Link to="/exam-info" className="hover:text-white transition-colors">Exam Information</Link></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 className="font-heading font-semibold text-white mb-4">Resources</h4>
+          <ul className="space-y-2">
+            <li><a href="https://www.11plusguide.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">11+ Guide</a></li>
+            <li><a href="https://www.kent.gov.uk/education-and-children/schools/school-places" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kent County Council</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div className="border-t border-stone-800 mt-8 pt-8 text-center text-sm">
+        <p>&copy; {new Date().getFullYear()} Kent 11+ Grammar Schools Hub. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+);
+
+// School Card Component
+const SchoolCard = ({ school, onCompareToggle, isSelected }) => (
+  <div className="school-card bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden flex flex-col" data-testid={`school-card-${school.slug}`}>
+    <div className="p-6 flex-1">
+      <div className="flex items-start justify-between mb-3">
+        <span className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${
+          school.gender === 'boys' ? 'bg-blue-100 text-blue-700' :
+          school.gender === 'girls' ? 'bg-pink-100 text-pink-700' :
+          'bg-green-100 text-green-700'
+        }`}>
+          {school.type}
+        </span>
+        <button 
+          onClick={() => onCompareToggle(school)}
+          className={`p-2 rounded-lg transition-colors ${isSelected ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}
+          data-testid={`compare-toggle-${school.slug}`}
+          title={isSelected ? "Remove from comparison" : "Add to comparison"}
         >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+          <Scale className="h-4 w-4" />
+        </button>
+      </div>
+      
+      <h3 className="font-heading text-xl font-semibold text-stone-900 mb-2">{school.name}</h3>
+      
+      <div className="flex items-center gap-1 text-stone-500 text-sm mb-4">
+        <MapPin className="h-4 w-4" />
+        <span>{school.address}</span>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="text-center p-3 bg-stone-50 rounded-lg">
+          <Users className="h-5 w-5 text-primary mx-auto mb-1" />
+          <p className="text-lg font-semibold text-stone-900">{school.pupils.toLocaleString()}</p>
+          <p className="text-xs text-stone-500">Pupils</p>
+        </div>
+        <div className="text-center p-3 bg-stone-50 rounded-lg">
+          <Trophy className="h-5 w-5 text-secondary mx-auto mb-1" />
+          <p className="text-lg font-semibold text-stone-900">{school.competition_ratio}:1</p>
+          <p className="text-xs text-stone-500">Competition</p>
+        </div>
+      </div>
+      
+      <p className="text-sm text-stone-500">
+        <strong>{school.places_year7}</strong> places available in Year 7
+      </p>
+    </div>
+    
+    <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/50">
+      <Link 
+        to={`/schools/${school.slug}`} 
+        className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-colors btn-press"
+        data-testid={`view-school-${school.slug}`}
+      >
+        View Details <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  </div>
+);
+
+// Stats Card Component
+const StatCard = ({ icon: Icon, value, label, color = "primary" }) => (
+  <div className="bg-white p-6 rounded-lg border border-stone-100 shadow-sm flex flex-col items-center text-center">
+    <Icon className={`h-8 w-8 mb-3 ${color === 'primary' ? 'text-primary' : 'text-secondary'}`} />
+    <p className="text-3xl font-bold text-stone-900">{value}</p>
+    <p className="text-sm text-stone-500">{label}</p>
+  </div>
+);
+
+// Home Page
+const HomePage = () => {
+  const [stats, setStats] = useState(null);
+  const [featuredSchools, setFeaturedSchools] = useState([]);
+  const [compareList, setCompareList] = useState([]);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, schoolsRes] = await Promise.all([
+          axios.get(`${API}/schools/stats/summary`),
+          axios.get(`${API}/schools?sort_by=competition_ratio&sort_order=desc`)
+        ]);
+        setStats(statsRes.data);
+        setFeaturedSchools(schoolsRes.data.slice(0, 6));
+      } catch (e) {
+        console.error("Error fetching data:", e);
+      }
+    };
+    fetchData();
+  }, []);
+  
+  const handleCompareToggle = (school) => {
+    setCompareList(prev => {
+      if (prev.find(s => s.id === school.id)) {
+        return prev.filter(s => s.id !== school.id);
+      }
+      if (prev.length >= 4) return prev;
+      return [...prev, school];
+    });
+  };
+  
+  return (
+    <div className="min-h-screen" data-testid="home-page">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url(https://images.unsplash.com/photo-1743291110939-d1bc31239c5f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzOTB8MHwxfHNlYXJjaHwxfHxicml0aXNoJTIwZ3JhbW1hciUyMHNjaG9vbCUyMGJ1aWxkaW5nJTIwYnJpY2slMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzcyNjYzNjQyfDA&ixlib=rb-4.1.0&q=85)`,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-stone-900/90 to-stone-900/70" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+          <div className="max-w-2xl animate-fade-in">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-6">
+              Kent Grammar Schools Hub
+            </h1>
+            <p className="text-lg md:text-xl text-stone-300 mb-8 leading-relaxed">
+              Your comprehensive guide to all 32 Kent grammar schools. Compare schools, understand admissions, and prepare for the 11+ exam.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link 
+                to="/schools" 
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all btn-press"
+                data-testid="hero-explore-btn"
+              >
+                Explore Schools <ArrowRight className="h-5 w-5" />
+              </Link>
+              <Link 
+                to="/exam-info" 
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-white/10 backdrop-blur text-white border border-white/20 rounded-md font-medium hover:bg-white/20 transition-all"
+                data-testid="hero-exam-btn"
+              >
+                Exam Information <BookOpen className="h-5 w-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Stats Section */}
+      {stats && (
+        <section className="py-16 md:py-20 bg-white border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="animate-fade-in">
+                <StatCard icon={Building2} value={stats.total_schools} label="Grammar Schools" />
+              </div>
+              <div className="animate-fade-in-delay-1">
+                <StatCard icon={Users} value={stats.total_places_year7?.toLocaleString() || 0} label="Year 7 Places" />
+              </div>
+              <div className="animate-fade-in-delay-2">
+                <StatCard icon={GraduationCap} value={stats.total_pupils?.toLocaleString() || 0} label="Total Pupils" color="secondary" />
+              </div>
+              <div className="animate-fade-in-delay-3">
+                <StatCard icon={Trophy} value={`${stats.average_competition}:1`} label="Avg Competition" color="secondary" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {/* Featured Schools */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+            <div>
+              <h2 className="font-heading text-3xl md:text-4xl font-semibold text-stone-900 tracking-tight mb-2">
+                Most Competitive Schools
+              </h2>
+              <p className="text-stone-600">Schools with the highest competition for places</p>
+            </div>
+            <Link 
+              to="/schools" 
+              className="mt-4 md:mt-0 text-primary font-medium hover:underline flex items-center gap-1"
+              data-testid="view-all-schools"
+            >
+              View all schools <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredSchools.map((school, i) => (
+              <div key={school.id} className={`animate-fade-in-delay-${i % 3 + 1}`}>
+                <SchoolCard 
+                  school={school} 
+                  onCompareToggle={handleCompareToggle}
+                  isSelected={compareList.some(s => s.id === school.id)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section 
+        className="relative py-20 bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(https://images.unsplash.com/photo-1651154368144-a53e9f1b3e23?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHwzfHxkaXZlcnNlJTIwaGlnaCUyMHNjaG9vbCUyMHN0dWRlbnRzJTIwc3R1ZHlpbmclMjB0b2dldGhlciUyMG1vZGVybnxlbnwwfHx8fDE3NzI2NjM2NTJ8MA&ixlib=rb-4.1.0&q=85)`,
+        }}
+      >
+        <div className="absolute inset-0 bg-primary/90" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-4">
+            Ready to Compare Schools?
+          </h2>
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
+            Use our comparison tool to evaluate schools side by side. Compare competition ratios, available places, and more.
+          </p>
+          <Link 
+            to="/compare" 
+            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary rounded-md font-semibold hover:bg-stone-100 transition-all btn-press"
+            data-testid="cta-compare-btn"
+          >
+            <Scale className="h-5 w-5" />
+            Compare Schools
+          </Link>
+        </div>
+      </section>
+      
+      {/* Compare Float Button */}
+      {compareList.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => navigate('/compare', { state: { selectedSchools: compareList } })}
+            className="flex items-center gap-2 px-4 py-3 bg-secondary text-white rounded-full shadow-lg hover:bg-secondary/90 transition-all btn-press"
+            data-testid="compare-float-btn"
+          >
+            <Scale className="h-5 w-5" />
+            Compare ({compareList.length})
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
+// Schools List Page
+const SchoolsPage = () => {
+  const [schools, setSchools] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [compareList, setCompareList] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  const [filters, setFilters] = useState({
+    search: searchParams.get('search') || '',
+    gender: searchParams.get('gender') || '',
+    sortBy: searchParams.get('sort_by') || 'name',
+    sortOrder: searchParams.get('sort_order') || 'asc'
+  });
+  
+  const [showFilters, setShowFilters] = useState(false);
+  
+  const fetchSchools = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filters.search) params.append('search', filters.search);
+      if (filters.gender) params.append('gender', filters.gender);
+      params.append('sort_by', filters.sortBy);
+      params.append('sort_order', filters.sortOrder);
+      
+      const response = await axios.get(`${API}/schools?${params.toString()}`);
+      setSchools(response.data);
+    } catch (e) {
+      console.error("Error fetching schools:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+  
+  useEffect(() => {
+    fetchSchools();
+  }, [fetchSchools]);
+  
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set(key === 'sortBy' ? 'sort_by' : key === 'sortOrder' ? 'sort_order' : key, value);
+    } else {
+      newParams.delete(key === 'sortBy' ? 'sort_by' : key === 'sortOrder' ? 'sort_order' : key);
+    }
+    setSearchParams(newParams);
+  };
+  
+  const handleCompareToggle = (school) => {
+    setCompareList(prev => {
+      if (prev.find(s => s.id === school.id)) {
+        return prev.filter(s => s.id !== school.id);
+      }
+      if (prev.length >= 4) return prev;
+      return [...prev, school];
+    });
+  };
+  
+  const clearFilters = () => {
+    setFilters({ search: '', gender: '', sortBy: 'name', sortOrder: 'asc' });
+    setSearchParams(new URLSearchParams());
+  };
+  
+  return (
+    <div className="min-h-screen py-8" data-testid="schools-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            Kent Grammar Schools
+          </h1>
+          <p className="text-stone-600">Browse and search all 32 grammar schools in Kent</p>
+        </div>
+        
+        {/* Search and Filter Bar */}
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search Input */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
+              <input
+                type="text"
+                placeholder="Search schools by name or location..."
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+                data-testid="search-input"
+              />
+            </div>
+            
+            {/* Filter Toggle Button (Mobile) */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="md:hidden flex items-center justify-center gap-2 px-4 py-3 border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
+              data-testid="filter-toggle-btn"
+            >
+              <Filter className="h-5 w-5" />
+              Filters
+            </button>
+            
+            {/* Desktop Filters */}
+            <div className="hidden md:flex items-center gap-4">
+              <select
+                value={filters.gender}
+                onChange={(e) => handleFilterChange('gender', e.target.value)}
+                className="px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+                data-testid="gender-filter"
+              >
+                <option value="">All Schools</option>
+                <option value="boys">Boys Schools</option>
+                <option value="girls">Girls Schools</option>
+                <option value="mixed">Co-educational</option>
+              </select>
+              
+              <select
+                value={filters.sortBy}
+                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                className="px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+                data-testid="sort-by-filter"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="pupils">Sort by Size</option>
+                <option value="places_year7">Sort by Places</option>
+                <option value="competition_ratio">Sort by Competition</option>
+              </select>
+              
+              <button
+                onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="px-4 py-3 border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50 transition-all"
+                data-testid="sort-order-btn"
+              >
+                {filters.sortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
+              </button>
+              
+              {(filters.search || filters.gender) && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center gap-1 px-4 py-3 text-stone-500 hover:text-stone-700"
+                  data-testid="clear-filters-btn"
+                >
+                  <X className="h-4 w-4" />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Mobile Filters */}
+          {showFilters && (
+            <div className="md:hidden mt-4 pt-4 border-t border-stone-200 flex flex-col gap-4">
+              <select
+                value={filters.gender}
+                onChange={(e) => handleFilterChange('gender', e.target.value)}
+                className="px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+              >
+                <option value="">All Schools</option>
+                <option value="boys">Boys Schools</option>
+                <option value="girls">Girls Schools</option>
+                <option value="mixed">Co-educational</option>
+              </select>
+              
+              <select
+                value={filters.sortBy}
+                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                className="px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="pupils">Sort by Size</option>
+                <option value="places_year7">Sort by Places</option>
+                <option value="competition_ratio">Sort by Competition</option>
+              </select>
+              
+              <div className="flex gap-4">
+                <button
+                  onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="flex-1 px-4 py-3 border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50 transition-all"
+                >
+                  {filters.sortOrder === 'asc' ? '↑ Ascending' : '↓ Descending'}
+                </button>
+                {(filters.search || filters.gender) && (
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-1 px-4 py-3 text-stone-500 hover:text-stone-700"
+                  >
+                    <X className="h-4 w-4" />
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Results Count */}
+        <p className="text-stone-500 mb-6">
+          Showing <strong className="text-stone-900">{schools.length}</strong> schools
+        </p>
+        
+        {/* Schools Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-stone-200 h-80 animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {schools.map(school => (
+              <SchoolCard 
+                key={school.id} 
+                school={school}
+                onCompareToggle={handleCompareToggle}
+                isSelected={compareList.some(s => s.id === school.id)}
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Compare Float Button */}
+        {compareList.length > 0 && (
+          <div className="fixed bottom-6 right-6 z-40">
+            <button
+              onClick={() => navigate('/compare', { state: { selectedSchools: compareList } })}
+              className="flex items-center gap-2 px-4 py-3 bg-secondary text-white rounded-full shadow-lg hover:bg-secondary/90 transition-all btn-press"
+              data-testid="compare-float-btn"
+            >
+              <Scale className="h-5 w-5" />
+              Compare ({compareList.length})
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// School Detail Page
+const SchoolDetailPage = () => {
+  const { slug } = useParams();
+  const [school, setSchool] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchSchool = async () => {
+      try {
+        const response = await axios.get(`${API}/schools/${slug}`);
+        setSchool(response.data);
+      } catch (e) {
+        console.error("Error fetching school:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSchool();
+  }, [slug]);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-stone-200 rounded w-1/3 mb-4" />
+            <div className="h-4 bg-stone-200 rounded w-1/4 mb-8" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 h-96 bg-stone-200 rounded-xl" />
+              <div className="h-96 bg-stone-200 rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!school) {
+    return (
+      <div className="min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="font-heading text-2xl font-bold text-stone-900 mb-4">School Not Found</h1>
+          <Link to="/schools" className="text-primary hover:underline">Back to all schools</Link>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen py-8" data-testid="school-detail-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-stone-500 mb-6">
+          <Link to="/" className="hover:text-primary">Home</Link>
+          <span>/</span>
+          <Link to="/schools" className="hover:text-primary">Schools</Link>
+          <span>/</span>
+          <span className="text-stone-900">{school.name}</span>
+        </nav>
+        
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded ${
+              school.gender === 'boys' ? 'bg-blue-100 text-blue-700' :
+              school.gender === 'girls' ? 'bg-pink-100 text-pink-700' :
+              'bg-green-100 text-green-700'
+            }`}>
+              {school.type}
+            </span>
+            <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded bg-stone-100 text-stone-600">
+              {school.county}
+            </span>
+          </div>
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            {school.name}
+          </h1>
+          <div className="flex items-center gap-2 text-stone-500">
+            <MapPin className="h-5 w-5" />
+            <span>{school.address}</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* About */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">About</h2>
+              <p className="text-stone-600 leading-relaxed">{school.description}</p>
+            </div>
+            
+            {/* Exam Format */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">11+ Exam Format</h2>
+              <p className="text-stone-500 mb-6">The Kent 11+ test is written by GL Assessment. All Kent grammar schools use the same exam.</p>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                  <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    Paper 1 - Reasoning
+                  </h3>
+                  <p className="text-stone-600 text-sm">{school.paper1_info}</p>
+                </div>
+                
+                <div className="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                  <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-secondary" />
+                    Paper 2 - English & Maths
+                  </h3>
+                  <p className="text-stone-600 text-sm">{school.paper2_info}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Key Stats */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">Key Information</h3>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+                  <span className="text-stone-500">Total Pupils</span>
+                  <span className="font-semibold text-stone-900">{school.pupils.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+                  <span className="text-stone-500">Year 7 Places</span>
+                  <span className="font-semibold text-stone-900">{school.places_year7}</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+                  <span className="text-stone-500">Competition</span>
+                  <span className="font-semibold text-secondary">{school.competition}</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+                  <span className="text-stone-500">Open Days</span>
+                  <span className="font-semibold text-stone-900">{school.open_days}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-stone-500">Exam Format</span>
+                  <span className="font-semibold text-stone-900">{school.exam_format}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Website Link */}
+            <a 
+              href={school.website} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all btn-press"
+              data-testid="school-website-link"
+            >
+              Visit School Website <ExternalLink className="h-4 w-4" />
+            </a>
+            
+            {/* Back to Schools */}
+            <Link 
+              to="/schools"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-white border border-stone-200 text-stone-700 rounded-lg font-medium hover:bg-stone-50 transition-all"
+              data-testid="back-to-schools"
+            >
+              Back to All Schools
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Compare Page
+const ComparePage = () => {
+  const [schools, setSchools] = useState([]);
+  const [selectedSchools, setSelectedSchools] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        const response = await axios.get(`${API}/schools`);
+        setSchools(response.data);
+      } catch (e) {
+        console.error("Error fetching schools:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSchools();
+  }, []);
+  
+  const handleSelectSchool = (school) => {
+    if (selectedSchools.find(s => s.id === school.id)) {
+      setSelectedSchools(prev => prev.filter(s => s.id !== school.id));
+    } else if (selectedSchools.length < 4) {
+      setSelectedSchools(prev => [...prev, school]);
+    }
+  };
+  
+  const compareFields = [
+    { key: 'type', label: 'Type' },
+    { key: 'pupils', label: 'Total Pupils', format: (v) => v.toLocaleString() },
+    { key: 'places_year7', label: 'Year 7 Places' },
+    { key: 'competition', label: 'Competition' },
+    { key: 'competition_ratio', label: 'Competition Ratio', format: (v) => `${v}:1` },
+    { key: 'open_days', label: 'Open Days' },
+    { key: 'exam_format', label: 'Exam Format' },
+    { key: 'address', label: 'Address' },
+  ];
+  
+  return (
+    <div className="min-h-screen py-8" data-testid="compare-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            Compare Schools
+          </h1>
+          <p className="text-stone-600">Select 2-4 schools to compare side by side</p>
+        </div>
+        
+        {/* School Selector */}
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 mb-8">
+          <h3 className="font-semibold text-stone-900 mb-4">Select Schools ({selectedSchools.length}/4)</h3>
+          
+          <div className="flex flex-wrap gap-2 mb-4">
+            {selectedSchools.map(school => (
+              <span 
+                key={school.id}
+                className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+              >
+                {school.name}
+                <button onClick={() => handleSelectSchool(school)} className="hover:text-primary/70">
+                  <X className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+          
+          <select
+            onChange={(e) => {
+              const school = schools.find(s => s.id === e.target.value);
+              if (school) handleSelectSchool(school);
+              e.target.value = '';
+            }}
+            className="w-full md:w-auto px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+            data-testid="school-selector"
+            disabled={selectedSchools.length >= 4}
+          >
+            <option value="">Add a school to compare...</option>
+            {schools.filter(s => !selectedSchools.find(sel => sel.id === s.id)).map(school => (
+              <option key={school.id} value={school.id}>{school.name}</option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Comparison Table */}
+        {selectedSchools.length >= 2 ? (
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full" data-testid="comparison-table">
+                <thead>
+                  <tr className="bg-stone-50">
+                    <th className="text-left p-4 font-semibold text-stone-900 border-b border-stone-200 min-w-[140px]">
+                      Attribute
+                    </th>
+                    {selectedSchools.map(school => (
+                      <th key={school.id} className="text-left p-4 font-semibold text-stone-900 border-b border-stone-200 min-w-[180px]">
+                        <Link to={`/schools/${school.slug}`} className="hover:text-primary">
+                          {school.name}
+                        </Link>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareFields.map(field => (
+                    <tr key={field.key} className="border-b border-stone-100 last:border-0">
+                      <td className="p-4 text-stone-500 font-medium">{field.label}</td>
+                      {selectedSchools.map(school => (
+                        <td key={school.id} className="p-4 text-stone-900">
+                          {field.format ? field.format(school[field.key]) : school[field.key]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-stone-50 rounded-xl border border-dashed border-stone-300 p-12 text-center">
+            <Scale className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+            <p className="text-stone-500">Select at least 2 schools to compare</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Exam Info Page
+const ExamInfoPage = () => (
+  <div className="min-h-screen py-8" data-testid="exam-info-page">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+          Kent 11+ Exam Information
+        </h1>
+        <p className="text-stone-600">Everything you need to know about the Kent grammar school entrance exam</p>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Exam Format */}
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">Exam Format</h2>
+            <p className="text-stone-600 mb-6">
+              The Kent 11+ test is written by GL Assessment. All schools in Kent use the same exam which grants entry for all schools.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="p-5 bg-blue-50 rounded-lg border border-blue-100">
+                <h3 className="font-semibold text-stone-900 mb-2">Paper 1 - Reasoning (50 minutes)</h3>
+                <ul className="text-stone-600 space-y-2 text-sm">
+                  <li>• Verbal Reasoning: 25 minutes (includes 5 minute practice)</li>
+                  <li>• Spatial Reasoning: Two 5-minute sections</li>
+                  <li>• Non-Verbal Reasoning: Three 5-minute sections</li>
+                </ul>
+              </div>
+              
+              <div className="p-5 bg-amber-50 rounded-lg border border-amber-100">
+                <h3 className="font-semibold text-stone-900 mb-2">Paper 2 - English & Mathematics (60 minutes)</h3>
+                <ul className="text-stone-600 space-y-2 text-sm">
+                  <li>• English: 30 minutes (includes 5 minute practice)</li>
+                  <li>• Mathematics: 30 minutes (includes 5 minute practice)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          {/* Age Adjustment */}
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">Age Adjusted Results</h2>
+            <p className="text-stone-600 leading-relaxed">
+              Because Kent uses GL papers, results are age adjusted to ensure younger children are not disadvantaged. 
+              The difference varies by paper and by year, but if there is a year gap, the oldest children would need 
+              to score roughly 10% more to get the same result as someone a year younger than them.
+            </p>
+          </div>
+          
+          {/* Preparation Tips */}
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">Preparation Options</h2>
+            
+            <div className="space-y-4">
+              <div className="p-4 border border-stone-200 rounded-lg">
+                <h3 className="font-semibold text-stone-900 mb-1">Private Tutor</h3>
+                <p className="text-stone-500 text-sm">£2,500 - £6,000 per year. One-to-one focused preparation.</p>
+              </div>
+              
+              <div className="p-4 border border-stone-200 rounded-lg">
+                <h3 className="font-semibold text-stone-900 mb-1">Tuition Centre</h3>
+                <p className="text-stone-500 text-sm">£1,500 - £3,500 per year. Group tuition with structured learning.</p>
+              </div>
+              
+              <div className="p-4 border border-stone-200 rounded-lg">
+                <h3 className="font-semibold text-stone-900 mb-1">Home Preparation</h3>
+                <p className="text-stone-500 text-sm">~£300 average spend on books and papers. Great for hands-on parents.</p>
+              </div>
+              
+              <div className="p-4 border border-stone-200 rounded-lg">
+                <h3 className="font-semibold text-stone-900 mb-1">Structured Courses</h3>
+                <p className="text-stone-500 text-sm">£12 - £89 total. Skills built gradually with guided materials.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <div className="bg-primary text-white rounded-xl p-6">
+            <h3 className="font-heading text-xl font-semibold mb-4">Key Dates</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex justify-between">
+                <span className="text-white/80">Registration Opens</span>
+                <span className="font-semibold">June</span>
+              </li>
+              <li className="flex justify-between">
+                <span className="text-white/80">Registration Closes</span>
+                <span className="font-semibold">July</span>
+              </li>
+              <li className="flex justify-between">
+                <span className="text-white/80">Test Date</span>
+                <span className="font-semibold">September</span>
+              </li>
+              <li className="flex justify-between">
+                <span className="text-white/80">Results</span>
+                <span className="font-semibold">October</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+            <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">Useful Resources</h3>
+            <ul className="space-y-3">
+              <li>
+                <a 
+                  href="https://www.11plusguide.com/grammar-school-test-areas/kent-grammar-schools/kent-11-plus-exam-format/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Kent 11+ Exam Format
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Kent County Council
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <Link 
+            to="/schools"
+            className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-secondary/90 transition-all btn-press"
+          >
+            Browse All Schools <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Main App
 function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen flex flex-col">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <Navigation />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/schools" element={<SchoolsPage />} />
+            <Route path="/schools/:slug" element={<SchoolDetailPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/exam-info" element={<ExamInfoPage />} />
+          </Routes>
+        </main>
+        <Footer />
       </BrowserRouter>
     </div>
   );
