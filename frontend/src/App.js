@@ -441,10 +441,10 @@ const SchoolsPage = () => {
               />
             </div>
             
-            {/* Filter Toggle Button (Mobile) */}
+            {/* Filter Toggle Button (Mobile/Tablet) */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden flex items-center justify-center gap-2 px-4 py-3 border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
+              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3 border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
               data-testid="filter-toggle-btn"
             >
               <Filter className="h-5 w-5" />
@@ -452,7 +452,7 @@ const SchoolsPage = () => {
             </button>
             
             {/* Desktop Filters */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-4">
               <select
                 value={filters.gender}
                 onChange={(e) => handleFilterChange('gender', e.target.value)}
@@ -498,9 +498,9 @@ const SchoolsPage = () => {
             </div>
           </div>
           
-          {/* Mobile Filters */}
+          {/* Mobile/Tablet Filters */}
           {showFilters && (
-            <div className="md:hidden mt-4 pt-4 border-t border-stone-200 flex flex-col gap-4">
+            <div className="lg:hidden mt-4 pt-4 border-t border-stone-200 flex flex-col gap-4">
               <select
                 value={filters.gender}
                 onChange={(e) => handleFilterChange('gender', e.target.value)}
