@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare } from "lucide-react";
+import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare, Calendar, Clock, Bell, CheckCircle, AlertCircle, FileText, Mail } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -34,6 +34,9 @@ const Navigation = () => {
             <Link to="/exam-info" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-exam-info">
               Exam Info
             </Link>
+            <Link to="/key-dates" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-key-dates">
+              Key Dates
+            </Link>
           </div>
           
           {/* Mobile menu button */}
@@ -61,6 +64,9 @@ const Navigation = () => {
               </Link>
               <Link to="/exam-info" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Exam Info
+              </Link>
+              <Link to="/key-dates" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Key Dates
               </Link>
             </div>
           </div>
@@ -91,6 +97,7 @@ const Footer = () => (
             <li><Link to="/schools" className="hover:text-white transition-colors">All Schools</Link></li>
             <li><Link to="/compare" className="hover:text-white transition-colors">Compare Schools</Link></li>
             <li><Link to="/exam-info" className="hover:text-white transition-colors">Exam Information</Link></li>
+            <li><Link to="/key-dates" className="hover:text-white transition-colors">Key Dates & Calendar</Link></li>
           </ul>
         </div>
         
@@ -1031,6 +1038,284 @@ const ExamInfoPage = () => (
   </div>
 );
 
+// Key Dates Page
+const KeyDatesPage = () => {
+  const currentDate = new Date();
+  
+  // Important dates for Kent Test 2025/2026 cycle
+  const keyDates = [
+    {
+      id: 1,
+      date: "2 June 2025",
+      dateObj: new Date("2025-06-02"),
+      title: "Kent Test Registration Opens",
+      description: "Online registration opens for the September 2025 Kent Test",
+      category: "registration",
+      status: "completed"
+    },
+    {
+      id: 2,
+      date: "1 July 2025",
+      dateObj: new Date("2025-07-01"),
+      title: "Kent Test Registration Closes",
+      description: "Deadline to register your child for the Kent Test. Late registrations may be accepted - contact kent.admissions@kent.gov.uk",
+      category: "registration",
+      status: "completed"
+    },
+    {
+      id: 3,
+      date: "September 2025",
+      dateObj: new Date("2025-09-11"),
+      title: "Kent Test Takes Place",
+      description: "Children sit the Kent Test at designated test centres. Two papers: Reasoning (50 mins) and English & Maths (60 mins)",
+      category: "exam",
+      status: "completed"
+    },
+    {
+      id: 4,
+      date: "16 October 2025",
+      dateObj: new Date("2025-10-16"),
+      title: "Kent Test Results Day",
+      description: "Results emailed to parents. Grammar threshold for 2025: total score of 332+ with no single score below 108",
+      category: "results",
+      status: "completed"
+    },
+    {
+      id: 5,
+      date: "31 October 2025",
+      dateObj: new Date("2025-10-31"),
+      title: "Secondary School Application Deadline",
+      description: "Deadline to submit secondary school applications via your local authority. Name up to 4 school preferences",
+      category: "application",
+      status: "completed"
+    },
+    {
+      id: 6,
+      date: "2 March 2026",
+      dateObj: new Date("2026-03-02"),
+      title: "National Offer Day",
+      description: "Secondary school places are offered. Check your email or local authority portal for your child's school allocation",
+      category: "results",
+      status: "upcoming"
+    },
+    {
+      id: 7,
+      date: "16 March 2026",
+      dateObj: new Date("2026-03-16"),
+      title: "Appeal Deadline",
+      description: "Deadline to submit appeals if you wish to challenge your school allocation. Appeals heard by independent panels",
+      category: "application",
+      status: "upcoming"
+    },
+    {
+      id: 8,
+      date: "May 2026",
+      dateObj: new Date("2026-05-01"),
+      title: "2026 Kent Test Details Released",
+      description: "Information and dates for the September 2026 Kent Test will be published on Kent County Council website",
+      category: "registration",
+      status: "upcoming"
+    },
+    {
+      id: 9,
+      date: "June 2026",
+      dateObj: new Date("2026-06-01"),
+      title: "2026 Registration Opens",
+      description: "Registration opens for children entering Year 6 in September 2026 who wish to take the Kent Test",
+      category: "registration",
+      status: "upcoming"
+    }
+  ];
+
+  const getStatusIcon = (status) => {
+    if (status === "completed") return <CheckCircle className="h-5 w-5 text-green-600" />;
+    return <Clock className="h-5 w-5 text-amber-500" />;
+  };
+
+  const getCategoryColor = (category) => {
+    switch(category) {
+      case "registration": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "exam": return "bg-purple-100 text-purple-700 border-purple-200";
+      case "results": return "bg-green-100 text-green-700 border-green-200";
+      case "application": return "bg-amber-100 text-amber-700 border-amber-200";
+      default: return "bg-stone-100 text-stone-700 border-stone-200";
+    }
+  };
+
+  const upcomingEvents = keyDates.filter(d => d.status === "upcoming");
+  const completedEvents = keyDates.filter(d => d.status === "completed");
+
+  return (
+    <div className="min-h-screen py-8" data-testid="key-dates-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            Key Dates & Calendar
+          </h1>
+          <p className="text-stone-600">Important dates for Kent 11+ admissions 2025/2026 cycle</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Timeline */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Upcoming Events Alert */}
+            {upcomingEvents.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Bell className="h-6 w-6 text-amber-600" />
+                  <h2 className="font-heading text-xl font-semibold text-stone-900">Upcoming Events</h2>
+                </div>
+                <div className="space-y-4">
+                  {upcomingEvents.slice(0, 3).map(event => (
+                    <div key={event.id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-amber-100">
+                      <div className="flex-shrink-0 w-16 text-center">
+                        <div className="text-xs font-bold uppercase text-amber-600">{event.date.split(" ")[1]}</div>
+                        <div className="text-2xl font-bold text-stone-900">{event.date.split(" ")[0]}</div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-stone-900">{event.title}</h3>
+                        <p className="text-sm text-stone-500 mt-1">{event.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Full Timeline */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-6">Complete Timeline</h2>
+              
+              <div className="relative">
+                {/* Timeline line */}
+                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-stone-200" />
+                
+                <div className="space-y-6">
+                  {keyDates.map((event, index) => (
+                    <div key={event.id} className="relative flex gap-4 pl-14">
+                      {/* Timeline dot */}
+                      <div className={`absolute left-4 w-5 h-5 rounded-full border-2 ${
+                        event.status === "completed" ? "bg-green-500 border-green-500" : "bg-white border-amber-500"
+                      }`} />
+                      
+                      <div className={`flex-1 p-4 rounded-lg border ${
+                        event.status === "upcoming" ? "bg-amber-50 border-amber-200" : "bg-stone-50 border-stone-200"
+                      }`}>
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded border ${getCategoryColor(event.category)}`}>
+                            {event.category}
+                          </span>
+                          <span className="text-sm font-medium text-stone-500">{event.date}</span>
+                          {getStatusIcon(event.status)}
+                        </div>
+                        <h3 className="font-semibold text-stone-900 mb-1">{event.title}</h3>
+                        <p className="text-sm text-stone-600">{event.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Info Card */}
+            <div className="bg-primary text-white rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="h-6 w-6" />
+                <h3 className="font-heading text-xl font-semibold">2025/2026 Cycle</h3>
+              </div>
+              <p className="text-white/80 text-sm mb-4">
+                Key dates for children entering Year 7 in September 2026
+              </p>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-white/70">Test Date</span>
+                  <span className="font-semibold">Sept 2025</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/70">Results</span>
+                  <span className="font-semibold">16 Oct 2025</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/70">Offer Day</span>
+                  <span className="font-semibold">2 Mar 2026</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Grammar Threshold */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">2025 Grammar Threshold</h3>
+              <div className="space-y-3">
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <div className="text-2xl font-bold text-green-700">332+</div>
+                  <div className="text-sm text-green-600">Total Score Required</div>
+                </div>
+                <div className="p-3 bg-stone-50 rounded-lg">
+                  <div className="text-lg font-semibold text-stone-900">108+</div>
+                  <div className="text-sm text-stone-500">Minimum per subject</div>
+                </div>
+                <p className="text-xs text-stone-500">
+                  Score range: 69-141 per subject. Maximum total: 423
+                </p>
+              </div>
+            </div>
+
+            {/* Contact Info */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">Need Help?</h3>
+              <div className="space-y-3">
+                <a 
+                  href="mailto:kent.admissions@kent.gov.uk"
+                  className="flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  <Mail className="h-4 w-4" />
+                  kent.admissions@kent.gov.uk
+                </a>
+                <a 
+                  href="https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Kent County Council Website
+                </a>
+              </div>
+            </div>
+
+            {/* Important Notes */}
+            <div className="bg-stone-50 rounded-xl border border-stone-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <h3 className="font-semibold text-stone-900">Important Notes</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-stone-600">
+                <li>• Being grammar assessed does NOT guarantee a place</li>
+                <li>• Grammar schools serve top 25% of ability range</li>
+                <li>• Check individual school admissions criteria</li>
+                <li>• Late registrations may be possible - contact admissions</li>
+                <li>• Medway & Bexley have separate tests</li>
+              </ul>
+            </div>
+
+            {/* CTA */}
+            <Link 
+              to="/schools"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-secondary/90 transition-all btn-press"
+            >
+              Browse All Schools <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main App
 function App() {
   return (
@@ -1044,6 +1329,7 @@ function App() {
             <Route path="/schools/:slug" element={<SchoolDetailPage />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/exam-info" element={<ExamInfoPage />} />
+            <Route path="/key-dates" element={<KeyDatesPage />} />
           </Routes>
         </main>
         <Footer />
