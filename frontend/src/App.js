@@ -1040,18 +1040,18 @@ const ExamInfoPage = () => (
 
 // Key Dates Page
 const KeyDatesPage = () => {
-  const currentDate = new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
   
   // Important dates for Kent Test 2025/2026 cycle
-  const keyDates = [
+  const rawDates = [
     {
       id: 1,
       date: "2 June 2025",
       dateObj: new Date("2025-06-02"),
       title: "Kent Test Registration Opens",
       description: "Online registration opens for the September 2025 Kent Test",
-      category: "registration",
-      status: "completed"
+      category: "registration"
     },
     {
       id: 2,
@@ -1059,17 +1059,15 @@ const KeyDatesPage = () => {
       dateObj: new Date("2025-07-01"),
       title: "Kent Test Registration Closes",
       description: "Deadline to register your child for the Kent Test. Late registrations may be accepted - contact kent.admissions@kent.gov.uk",
-      category: "registration",
-      status: "completed"
+      category: "registration"
     },
     {
       id: 3,
-      date: "September 2025",
+      date: "11 September 2025",
       dateObj: new Date("2025-09-11"),
       title: "Kent Test Takes Place",
       description: "Children sit the Kent Test at designated test centres. Two papers: Reasoning (50 mins) and English & Maths (60 mins)",
-      category: "exam",
-      status: "completed"
+      category: "exam"
     },
     {
       id: 4,
@@ -1077,8 +1075,7 @@ const KeyDatesPage = () => {
       dateObj: new Date("2025-10-16"),
       title: "Kent Test Results Day",
       description: "Results emailed to parents. Grammar threshold for 2025: total score of 332+ with no single score below 108",
-      category: "results",
-      status: "completed"
+      category: "results"
     },
     {
       id: 5,
@@ -1086,8 +1083,7 @@ const KeyDatesPage = () => {
       dateObj: new Date("2025-10-31"),
       title: "Secondary School Application Deadline",
       description: "Deadline to submit secondary school applications via your local authority. Name up to 4 school preferences",
-      category: "application",
-      status: "completed"
+      category: "application"
     },
     {
       id: 6,
@@ -1095,8 +1091,7 @@ const KeyDatesPage = () => {
       dateObj: new Date("2026-03-02"),
       title: "National Offer Day",
       description: "Secondary school places are offered. Check your email or local authority portal for your child's school allocation",
-      category: "results",
-      status: "upcoming"
+      category: "results"
     },
     {
       id: 7,
@@ -1104,28 +1099,34 @@ const KeyDatesPage = () => {
       dateObj: new Date("2026-03-16"),
       title: "Appeal Deadline",
       description: "Deadline to submit appeals if you wish to challenge your school allocation. Appeals heard by independent panels",
-      category: "application",
-      status: "upcoming"
+      category: "application"
     },
     {
       id: 8,
-      date: "May 2026",
+      date: "1 May 2026",
       dateObj: new Date("2026-05-01"),
       title: "2026 Kent Test Details Released",
       description: "Information and dates for the September 2026 Kent Test will be published on Kent County Council website",
-      category: "registration",
-      status: "upcoming"
+      category: "registration"
     },
     {
       id: 9,
-      date: "June 2026",
+      date: "1 June 2026",
       dateObj: new Date("2026-06-01"),
       title: "2026 Registration Opens",
       description: "Registration opens for children entering Year 6 in September 2026 who wish to take the Kent Test",
-      category: "registration",
-      status: "upcoming"
+      category: "registration"
     }
   ];
+
+  // Dynamically calculate status based on today's date
+  const keyDates = rawDates.map(event => ({
+    ...event,
+    status: event.dateObj < today ? "completed" : "upcoming"
+  }));
+  
+  // Find the next upcoming event
+  const nextUpcoming = keyDates.find(e => e.status === "upcoming");
 
   const getStatusIcon = (status) => {
     if (status === "completed") return <CheckCircle className="h-5 w-5 text-green-600" />;
@@ -1144,6 +1145,11 @@ const KeyDatesPage = () => {
 
   const upcomingEvents = keyDates.filter(d => d.status === "upcoming");
   const completedEvents = keyDates.filter(d => d.status === "completed");
+  
+  // Format today's date for display
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
   return (
     <div className="min-h-screen py-8" data-testid="key-dates-page">
@@ -1154,6 +1160,10 @@ const KeyDatesPage = () => {
             Key Dates & Calendar
           </h1>
           <p className="text-stone-600">Important dates for Kent 11+ admissions 2025/2026 cycle</p>
+          <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            <Clock className="h-4 w-4" />
+            Today: {formatDate(today)}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1166,8 +1176,33 @@ const KeyDatesPage = () => {
                   <Bell className="h-6 w-6 text-amber-600" />
                   <h2 className="font-heading text-xl font-semibold text-stone-900">Upcoming Events</h2>
                 </div>
-                <div className="space-y-4">
-                  {upcomingEvents.slice(0, 3).map(event => (
+                
+                {/* Next Event - Highlighted */}
+                {nextUpcoming && (
+                  <div className="mb-4 p-4 bg-amber-100 rounded-lg border-2 border-amber-400 relative">
+                    <span className="absolute -top-2 left-4 px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded uppercase">
+                      Next Up
+                    </span>
+                    <div className="flex items-start gap-4 mt-2">
+                      <div className="flex-shrink-0 w-16 text-center">
+                        <div className="text-xs font-bold uppercase text-amber-700">{nextUpcoming.date.split(" ")[1]}</div>
+                        <div className="text-3xl font-bold text-stone-900">{nextUpcoming.date.split(" ")[0]}</div>
+                        <div className="text-xs text-amber-600">{nextUpcoming.date.split(" ")[2]}</div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-stone-900 text-lg">{nextUpcoming.title}</h3>
+                        <p className="text-sm text-stone-600 mt-1">{nextUpcoming.description}</p>
+                        <p className="text-xs text-amber-700 mt-2 font-medium">
+                          {Math.ceil((nextUpcoming.dateObj - today) / (1000 * 60 * 60 * 24))} days from now
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Other upcoming events */}
+                <div className="space-y-3">
+                  {upcomingEvents.filter(e => e.id !== nextUpcoming?.id).slice(0, 2).map(event => (
                     <div key={event.id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-amber-100">
                       <div className="flex-shrink-0 w-16 text-center">
                         <div className="text-xs font-bold uppercase text-amber-600">{event.date.split(" ")[1]}</div>
@@ -1196,13 +1231,26 @@ const KeyDatesPage = () => {
                     <div key={event.id} className="relative flex gap-4 pl-14">
                       {/* Timeline dot */}
                       <div className={`absolute left-4 w-5 h-5 rounded-full border-2 ${
-                        event.status === "completed" ? "bg-green-500 border-green-500" : "bg-white border-amber-500"
+                        event.status === "completed" 
+                          ? "bg-green-500 border-green-500" 
+                          : event.id === nextUpcoming?.id 
+                            ? "bg-amber-500 border-amber-500 ring-4 ring-amber-200" 
+                            : "bg-white border-stone-300"
                       }`} />
                       
                       <div className={`flex-1 p-4 rounded-lg border ${
-                        event.status === "upcoming" ? "bg-amber-50 border-amber-200" : "bg-stone-50 border-stone-200"
+                        event.id === nextUpcoming?.id 
+                          ? "bg-amber-100 border-amber-400 border-2" 
+                          : event.status === "upcoming" 
+                            ? "bg-stone-50 border-stone-200" 
+                            : "bg-stone-50 border-stone-200 opacity-75"
                       }`}>
                         <div className="flex flex-wrap items-center gap-2 mb-2">
+                          {event.id === nextUpcoming?.id && (
+                            <span className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded bg-amber-500 text-white">
+                              Next
+                            </span>
+                          )}
                           <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded border ${getCategoryColor(event.category)}`}>
                             {event.category}
                           </span>
@@ -1211,6 +1259,11 @@ const KeyDatesPage = () => {
                         </div>
                         <h3 className="font-semibold text-stone-900 mb-1">{event.title}</h3>
                         <p className="text-sm text-stone-600">{event.description}</p>
+                        {event.id === nextUpcoming?.id && (
+                          <p className="text-xs text-amber-700 mt-2 font-medium">
+                            {Math.ceil((event.dateObj - today) / (1000 * 60 * 60 * 24))} days from now
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
