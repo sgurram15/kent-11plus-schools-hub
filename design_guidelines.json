@@ -1,0 +1,144 @@
+{
+  "project_name": "Kent 11+ Grammar Schools Hub",
+  "design_philosophy": {
+    "theme": "Light Mode (Academic/Professional)",
+    "archetype": "Organic & Earthy + Swiss Precision",
+    "core_values": ["Trust", "Clarity", "Growth", "Accessibility"],
+    "mood": "A modern, trustworthy educational resource. Not dusty/old, but respectful of tradition. Clean, structured data presentation mixed with warm, human imagery."
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Playfair Display, serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
+      "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+      "h3": "text-2xl font-medium",
+      "body": "text-base leading-relaxed text-stone-600",
+      "small": "text-sm text-stone-500",
+      "tiny_label": "text-xs font-bold uppercase tracking-widest text-stone-400"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#1e3a8a",
+        "foreground": "#ffffff",
+        "description": "Oxford Blue - Represents trust, intelligence, and authority."
+      },
+      "secondary": {
+        "DEFAULT": "#d97706",
+        "foreground": "#ffffff",
+        "description": "Burnt Amber - Adds energy, warmth, and highlights key actions."
+      },
+      "background": "#fafaf9",
+      "surface": "#ffffff",
+      "text": {
+        "primary": "#1c1917",
+        "secondary": "#57534e",
+        "muted": "#a8a29e"
+      },
+      "border": "#e7e5e4",
+      "accent": {
+        "green": "#15803d",
+        "red": "#b91c1c"
+      }
+    },
+    "usage_rules": {
+      "background": "Use 'bg-stone-50' (#fafaf9) for the main page background to avoid sterile white.",
+      "cards": "Use 'bg-white' with subtle borders ('border-stone-200') and soft shadows.",
+      "primary_action": "Use Primary Blue for main buttons. Use Secondary Amber for 'Apply' or 'Urgent' actions.",
+      "text": "Never use pure black (#000000). Use 'text-stone-900' for headings and 'text-stone-600' for body."
+    }
+  },
+  "layout_strategy": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing": {
+      "section_gap": "py-16 md:py-24",
+      "element_gap": "gap-6 md:gap-8"
+    },
+    "grid_system": {
+      "school_list": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+      "features": "grid grid-cols-1 md:grid-cols-3 gap-8",
+      "detail_page": "grid grid-cols-1 lg:grid-cols-12 gap-8"
+    }
+  },
+  "components": {
+    "buttons": {
+      "style": "rounded-md font-medium transition-all duration-200 active:scale-95",
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
+      "secondary": "bg-white border border-input hover:bg-stone-50 text-stone-900 shadow-sm",
+      "ghost": "hover:bg-stone-100 text-stone-600 hover:text-stone-900"
+    },
+    "cards": {
+      "school_card": "bg-white rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col overflow-hidden group",
+      "stat_card": "bg-white p-6 rounded-lg border border-stone-100 shadow-sm flex flex-col items-center text-center"
+    },
+    "inputs": {
+      "style": "h-11 rounded-md border-stone-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+    },
+    "navigation": {
+      "nav_bar": "sticky top-0 z-50 w-full border-b border-stone-200/60 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60",
+      "footer": "bg-stone-900 text-stone-400 py-12"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": "shadow-sm for cards, shadow-lg for floating elements/modals.",
+    "borders": "1px solid #e7e5e4 (stone-200). Use 'divide-y' for lists.",
+    "radius": "rounded-lg for small elements, rounded-xl for cards, rounded-2xl for modals.",
+    "icons": "Use 'lucide-react' icons. Stroke width 1.5px for elegance.",
+    "motion": "Use 'framer-motion' for subtle entrances. No chaotic movement. Smooth fade-ins and slide-ups."
+  },
+  "image_assets": {
+    "hero_bg": {
+      "url": "https://images.unsplash.com/photo-1743291110939-d1bc31239c5f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzOTB8MHwxfHNlYXJjaHwxfHxicml0aXNoJTIwZ3JhbW1hciUyMHNjaG9vbCUyMGJ1aWxkaW5nJTIwYnJpY2slMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzcyNjYzNjQyfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Historic British Grammar School Building",
+      "usage": "Hero section background with dark overlay for text readability."
+    },
+    "students_study": {
+      "url": "https://images.unsplash.com/photo-1651154368144-a53e9f1b3e23?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHwzfHxkaXZlcnNlJTIwaGlnaCUyMHNjaG9vbCUyMHN0dWRlbnRzJTIwc3R1ZHlpbmclMjB0b2dldGhlciUyMG1vZGVybnxlbnwwfHx8fDE3NzI2NjM2NTJ8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Diverse students studying together",
+      "usage": "About section or 'Why Choose Grammar Schools' feature."
+    },
+    "exam_prep": {
+      "url": "https://images.unsplash.com/photo-1752578753798-ff3a23e16498?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwxfHxjbGFzc3Jvb20lMjBleGFtJTIwcGFwZXIlMjBwZW4lMjB3cml0aW5nfGVufDB8fHx8MTc3MjY2MzY0NHww&ixlib=rb-4.1.0&q=85",
+      "alt": "Exam papers and pens",
+      "usage": "Exam Resources section header."
+    },
+    "community": {
+      "url": "https://images.unsplash.com/photo-1772419186959-fdb8cc37e149?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHw0fHxwYXJlbnQlMjB0ZWFjaGVyJTIwbWVldGluZyUyMGRpdmVyc2UlMjBoYXBweXxlbnwwfHx8fDE3NzI2NjM2NDR8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Parents and teachers in classroom",
+      "usage": "Footer or Community/Contact section."
+    },
+    "hallway": {
+      "url": "https://images.unsplash.com/photo-1762537766222-6e414c856a10?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBicmlnaHQlMjBzY2hvb2wlMjBoYWxsd2F5JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzcyNjYzNjUzfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Modern bright school hallway",
+      "usage": "Alternative background or 'Facilities' section."
+    }
+  },
+  "accessibility_checklist": [
+    "Ensure 4.5:1 contrast ratio for all body text.",
+    "Interactive elements must have a min-target size of 44x44px.",
+    "Images must have descriptive alt text.",
+    "Form inputs must have associated labels.",
+    "Focus states must be clearly visible (ring-2 ring-primary).",
+    "Support keyboard navigation for all interactive elements."
+  ],
+  "universal_guidelines": [
+    "Do NOT use gradients for text or buttons. Keep it flat and clean.",
+    "Avoid generic 'Education Blue' everywhere. Use the Stone/Earth tones to balance.",
+    "Use generous whitespace (p-8, p-12) to create a premium feel.",
+    "Micro-interactions: Buttons should scale down slightly on click. Links should have a subtle underline animation.",
+    "Data-testid: All interactive elements must have 'data-testid' attributes.",
+    "No 'Lorem Ipsum' in final output if possible - use realistic placeholder data."
+  ],
+  "instructions_to_main_agent": [
+    "1. Setup the Theme: Update 'tailwind.config.js' and 'index.css' first to match the color palette.",
+    "2. Build the Layout: Create a 'Layout' component with the sticky navbar and footer.",
+    "3. Create Components: Build 'SchoolCard', 'FilterSidebar', 'ComparisonTable' using shadcn primitives but customized.",
+    "4. Implement Pages: Start with Home, then Listing, then Detail.",
+    "5. Ensure Mobile Responsiveness: Test grid-cols-1 on mobile for all grids."
+  ]
+}
