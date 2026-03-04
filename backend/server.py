@@ -43,8 +43,11 @@ class School(BaseModel):
     exam_format: str = "Kent 11 Plus Test"
     website: str
     description: str
-    paper1_info: str = "50 minute Reasoning paper with Verbal, Spatial and Non-Verbal Reasoning sections"
-    paper2_info: str = "60 minute English and Mathematics paper"
+    # School-specific unique features
+    specialist_status: str = ""  # e.g., "Language College", "Science Specialist"
+    sixth_form: str = ""  # e.g., "Co-educational", "IB Programme available"
+    highlights: List[str] = []  # Unique features/achievements
+    founded: str = ""  # Year founded if known
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class SchoolCreate(BaseModel):
@@ -62,8 +65,10 @@ class SchoolCreate(BaseModel):
     exam_format: str = "Kent 11 Plus Test"
     website: str
     description: str
-    paper1_info: str = "50 minute Reasoning paper with Verbal, Spatial and Non-Verbal Reasoning sections"
-    paper2_info: str = "60 minute English and Mathematics paper"
+    specialist_status: str = ""
+    sixth_form: str = ""
+    highlights: List[str] = []
+    founded: str = ""
 
 class SchoolResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -83,13 +88,15 @@ class SchoolResponse(BaseModel):
     exam_format: str
     website: str
     description: str
-    paper1_info: str
-    paper2_info: str
+    specialist_status: str = ""
+    sixth_form: str = ""
+    highlights: List[str] = []
+    founded: str = ""
 
 class CompareRequest(BaseModel):
     school_ids: List[str]
 
-# Seed data for all 32 Kent Grammar Schools
+# Seed data for all 32 Kent Grammar Schools with unique features
 KENT_GRAMMAR_SCHOOLS = [
     {
         "name": "Dartford Grammar School",
@@ -103,7 +110,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "6 applicants for every place",
         "competition_ratio": 6.0,
         "website": "http://www.dartfordgrammarschool.org.uk",
-        "description": "Dartford Grammar School is an oversubscribed school with a co-educational sixth form. The school offers AS, A-level courses and the International Baccalaureate (IB) programme. It has been an International Language College since 1995."
+        "description": "Dartford Grammar School is an oversubscribed school with a co-educational sixth form. The school offers AS, A-level courses and the International Baccalaureate (IB) programme.",
+        "specialist_status": "International Language College",
+        "sixth_form": "Co-educational with IB Diploma Programme",
+        "highlights": ["International Baccalaureate (IB) since 1995", "Middle Years Programme (MYP)", "Visual impairment support unit", "RATL mentor school"],
+        "founded": "1576"
     },
     {
         "name": "Dartford Grammar School for Girls",
@@ -117,7 +128,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "5 applicants for every place",
         "competition_ratio": 5.0,
         "website": "http://www.dartfordgrammargirls.kent.sch.uk",
-        "description": "Dartford Grammar School for Girls is a selective girls' grammar school with an excellent academic record. The school offers a wide range of A-level subjects and has strong pastoral care."
+        "description": "Dartford Grammar School for Girls is a selective girls' grammar school with an excellent academic record and strong pastoral care.",
+        "specialist_status": "Science College",
+        "sixth_form": "Girls only with wide A-level range",
+        "highlights": ["Outstanding Ofsted rating", "Strong STEM programs", "Duke of Edinburgh Award scheme", "Extensive sports facilities"],
+        "founded": "1904"
     },
     {
         "name": "The Judd School",
@@ -131,7 +146,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4-5 applicants for every place",
         "competition_ratio": 4.5,
         "website": "http://www.judd.online",
-        "description": "The Judd School is a selective school with specialist status in music and mathematics. Girls are admitted in Year 12. Almost all students go on to higher education."
+        "description": "The Judd School is a selective school with specialist status in music and mathematics. Almost all students go on to higher education.",
+        "specialist_status": "Music and Mathematics Specialist",
+        "sixth_form": "Co-educational from Year 12",
+        "highlights": ["Specialist Music College", "Outstanding Mathematics results", "Strong Oxbridge entry record", "Extensive co-curricular program"],
+        "founded": "1888"
     },
     {
         "name": "Barton Court Grammar School",
@@ -139,13 +158,17 @@ KENT_GRAMMAR_SCHOOLS = [
         "address": "Longport, Canterbury CT1 1PH",
         "type": "Co-educational Grammar",
         "gender": "mixed",
-        "pupils": 1100,
-        "places_year7": 180,
-        "open_days": "October",
-        "competition": "3 applicants for every place",
-        "competition_ratio": 3.0,
+        "pupils": 838,
+        "places_year7": 120,
+        "open_days": "June",
+        "competition": "5 applicants for every place",
+        "competition_ratio": 5.0,
         "website": "http://www.bartoncourt.org",
-        "description": "Barton Court Grammar School is a fully co-educational grammar school in Canterbury. It has a strong tradition of academic excellence and extra-curricular activities."
+        "description": "Barton Court Grammar School is a co-educational selective school drawing most of its students from Canterbury and the surrounding area.",
+        "specialist_status": "Specialist Language College",
+        "sixth_form": "International Baccalaureate (IB) only",
+        "highlights": ["IB Diploma Programme since 2007", "Language College since 2005", "European exchange students", "Strong international links"],
+        "founded": "1942"
     },
     {
         "name": "Borden Grammar School",
@@ -159,7 +182,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "3 applicants for every place",
         "competition_ratio": 3.0,
         "website": "http://www.bordengrammar.kent.sch.uk",
-        "description": "Borden Grammar School is a selective boys' grammar school in Sittingbourne with a co-educational sixth form. The school has specialist status in Science and Mathematics."
+        "description": "Borden Grammar School is a selective boys' grammar school in Sittingbourne with a co-educational sixth form.",
+        "specialist_status": "Science and Mathematics Specialist",
+        "sixth_form": "Co-educational",
+        "highlights": ["Science specialist status", "Strong engineering links", "Combined Cadet Force (CCF)", "Award-winning Duke of Edinburgh program"],
+        "founded": "1879"
     },
     {
         "name": "Chatham House Grammar School",
@@ -173,7 +200,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.chathamhousegrammar.co.uk",
-        "description": "Chatham House Grammar School is a selective boys' grammar school with a mixed sixth form. The school has a strong academic tradition and excellent sports facilities."
+        "description": "Chatham House Grammar School is a selective boys' grammar school with a mixed sixth form and strong academic tradition.",
+        "specialist_status": "Technology College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Technology College status", "Strong sporting tradition", "Historic school building", "Active alumni network"],
+        "founded": "1797"
     },
     {
         "name": "Clarendon House Grammar School",
@@ -187,7 +218,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.clarendonhouseschool.co.uk",
-        "description": "Clarendon House Grammar School is a selective girls' grammar school with a mixed sixth form in Ramsgate. The school is known for its excellent pastoral care."
+        "description": "Clarendon House Grammar School is a selective girls' grammar school with a mixed sixth form in Ramsgate, known for excellent pastoral care.",
+        "specialist_status": "Humanities College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Humanities specialist", "Outstanding pastoral support", "Strong arts program", "Community engagement focus"],
+        "founded": "1904"
     },
     {
         "name": "Dane Court Grammar School",
@@ -201,7 +236,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2.5 applicants for every place",
         "competition_ratio": 2.5,
         "website": "http://www.danecourt.kent.sch.uk",
-        "description": "Dane Court Grammar School is a fully co-educational grammar school in Broadstairs. It offers a broad curriculum and has excellent facilities for science and the arts."
+        "description": "Dane Court Grammar School is a fully co-educational grammar school in Broadstairs with excellent facilities for science and the arts.",
+        "specialist_status": "Science College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Science College status", "Modern science facilities", "Strong performing arts", "Beach proximity for marine biology"],
+        "founded": "1957"
     },
     {
         "name": "Dover Grammar School for Boys",
@@ -215,7 +254,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.dgsb.co.uk",
-        "description": "Dover Grammar School for Boys is a selective boys' grammar school with a strong tradition of academic achievement. The school has a mixed sixth form."
+        "description": "Dover Grammar School for Boys is a selective boys' grammar school with a strong tradition of academic achievement.",
+        "specialist_status": "Sports College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Sports College status", "Rugby excellence program", "French exchange links", "Strong cadet force"],
+        "founded": "1905"
     },
     {
         "name": "Dover Grammar School for Girls",
@@ -229,7 +272,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.dggs.kent.sch.uk",
-        "description": "Dover Grammar School for Girls is a selective girls' grammar school with excellent academic results. The school offers a wide range of extra-curricular activities."
+        "description": "Dover Grammar School for Girls is a selective girls' grammar school with excellent academic results and wide extra-curricular activities.",
+        "specialist_status": "Mathematics and Computing College",
+        "sixth_form": "Girls only",
+        "highlights": ["Maths & Computing specialist", "STEM ambassador school", "Music excellence", "European school partnerships"],
+        "founded": "1905"
     },
     {
         "name": "Gravesend Grammar School",
@@ -243,7 +290,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.gravesendgrammar.com",
-        "description": "Gravesend Grammar School is one of the oldest grammar schools in Kent. It has a strong academic tradition and excellent facilities for sport and music."
+        "description": "Gravesend Grammar School is one of the oldest grammar schools in Kent with strong academic and sporting traditions.",
+        "specialist_status": "Language College",
+        "sixth_form": "Co-educational",
+        "highlights": ["One of Kent's oldest schools", "Strong Oxbridge tradition", "Award-winning Combined Cadet Force", "Mandarin Chinese offered"],
+        "founded": "1576"
     },
     {
         "name": "Highsted Grammar School",
@@ -257,7 +308,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "3 applicants for every place",
         "competition_ratio": 3.0,
         "website": "http://www.highsted.kent.sch.uk",
-        "description": "Highsted Grammar School is a selective girls' grammar school in Sittingbourne. The school has specialist status in Science and is known for its strong STEM programs."
+        "description": "Highsted Grammar School is a selective girls' grammar school known for strong STEM programs and science specialist status.",
+        "specialist_status": "Science Specialist",
+        "sixth_form": "Girls only",
+        "highlights": ["Science specialist since 2003", "Outstanding STEM results", "Young Enterprise awards", "Strong university preparation"],
+        "founded": "1904"
     },
     {
         "name": "Highworth Grammar School",
@@ -271,7 +326,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "3 applicants for every place",
         "competition_ratio": 3.0,
         "website": "http://www.highworth.kent.sch.uk",
-        "description": "Highworth Grammar School is a selective girls' grammar school in Ashford with a mixed sixth form. The school has strong links with local businesses and universities."
+        "description": "Highworth Grammar School is a selective girls' grammar school in Ashford with strong links with local businesses and universities.",
+        "specialist_status": "Business and Enterprise College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Business & Enterprise status", "Industry partnerships", "Young Enterprise champions", "Entrepreneur programs"],
+        "founded": "1903"
     },
     {
         "name": "Invicta Grammar School",
@@ -285,7 +344,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.invicta.kent.sch.uk",
-        "description": "Invicta Grammar School is a selective girls' grammar school in Maidstone. The school is known for its excellent academic results and strong performing arts program."
+        "description": "Invicta Grammar School is a selective girls' grammar school in Maidstone known for excellent academic results and strong performing arts.",
+        "specialist_status": "Performing Arts College",
+        "sixth_form": "Girls only",
+        "highlights": ["Performing Arts specialist", "Outstanding drama facilities", "Annual West End show trip", "Music scholarships available"],
+        "founded": "1907"
     },
     {
         "name": "Maidstone Grammar School",
@@ -299,7 +362,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.mgs.kent.sch.uk",
-        "description": "Maidstone Grammar School is one of the oldest grammar schools in England, founded in 1549. It has a strong academic tradition and excellent sports facilities."
+        "description": "Maidstone Grammar School is one of the oldest grammar schools in England, founded in 1549, with a strong academic tradition.",
+        "specialist_status": "Mathematics and Computing",
+        "sixth_form": "Co-educational",
+        "highlights": ["Founded 1549 - one of England's oldest", "Maths & Computing specialist", "Historic campus", "Strong rugby tradition"],
+        "founded": "1549"
     },
     {
         "name": "Maidstone Grammar School for Girls",
@@ -313,7 +380,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.mggs.org",
-        "description": "Maidstone Grammar School for Girls is a highly successful selective school with outstanding academic results. The school offers a wide range of A-level subjects."
+        "description": "Maidstone Grammar School for Girls is a highly successful selective school with outstanding academic results.",
+        "specialist_status": "Language College",
+        "sixth_form": "Girls only",
+        "highlights": ["Outstanding Ofsted rating", "Language College status", "Extensive modern languages", "Japanese exchange program"],
+        "founded": "1888"
     },
     {
         "name": "Mayfield Grammar School",
@@ -327,7 +398,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.mayfield.kent.sch.uk",
-        "description": "Mayfield Grammar School is a selective girls' grammar school in Gravesend with a mixed sixth form. The school has strong academic results and excellent pastoral support."
+        "description": "Mayfield Grammar School is a selective girls' grammar school in Gravesend with strong academic results and excellent pastoral support.",
+        "specialist_status": "Science College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Science College status", "Outstanding pastoral care", "STEM ambassador school", "Award-winning eco initiatives"],
+        "founded": "1912"
     },
     {
         "name": "Oakwood Park Grammar School",
@@ -341,7 +416,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "3 applicants for every place",
         "competition_ratio": 3.0,
         "website": "http://www.opgs.org",
-        "description": "Oakwood Park Grammar School is a selective boys' grammar school in Maidstone with a co-educational sixth form. The school has specialist status in Science."
+        "description": "Oakwood Park Grammar School is a selective boys' grammar school in Maidstone with a co-educational sixth form and science specialist status.",
+        "specialist_status": "Science College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Science College status", "Modern science labs", "Strong engineering links", "Active careers program"],
+        "founded": "1958"
     },
     {
         "name": "Queen Elizabeth's Grammar School",
@@ -355,7 +434,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "3 applicants for every place",
         "competition_ratio": 3.0,
         "website": "http://www.qes.kent.sch.uk",
-        "description": "Queen Elizabeth's Grammar School in Faversham is a fully co-educational grammar school founded in 1527. It has a rich history and strong academic tradition."
+        "description": "Queen Elizabeth's Grammar School in Faversham is a fully co-educational grammar school founded in 1527 with a rich history.",
+        "specialist_status": "Mathematics and Computing",
+        "sixth_form": "Co-educational",
+        "highlights": ["Founded 1527 - nearly 500 years old", "Historic Tudor buildings", "Maths & Computing specialist", "Strong community links"],
+        "founded": "1527"
     },
     {
         "name": "Simon Langton Grammar School for Boys",
@@ -369,7 +452,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.langton.kent.sch.uk",
-        "description": "Simon Langton Grammar School for Boys is a highly selective grammar school in Canterbury. The school has excellent academic results and strong science programs."
+        "description": "Simon Langton Grammar School for Boys is a highly selective grammar school in Canterbury with excellent academic results and strong science programs.",
+        "specialist_status": "Science College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Top 100 UK state school", "Science College status", "Strong Oxbridge record", "Canterbury Cathedral links"],
+        "founded": "1881"
     },
     {
         "name": "Simon Langton Girls' Grammar School",
@@ -383,7 +470,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.langton.kent.sch.uk",
-        "description": "Simon Langton Girls' Grammar School is a selective girls' grammar school in Canterbury with a mixed sixth form. The school has outstanding academic results."
+        "description": "Simon Langton Girls' Grammar School is a selective girls' grammar school in Canterbury with outstanding academic results.",
+        "specialist_status": "Mathematics and Computing",
+        "sixth_form": "Co-educational",
+        "highlights": ["Outstanding Ofsted rating", "Maths & Computing specialist", "Extensive music program", "International school links"],
+        "founded": "1881"
     },
     {
         "name": "Sir Roger Manwood's School",
@@ -397,7 +488,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.srms.kent.sch.uk",
-        "description": "Sir Roger Manwood's School is a fully co-educational grammar school in Sandwich, founded in 1563. The school has a strong tradition of academic excellence."
+        "description": "Sir Roger Manwood's School is a fully co-educational grammar school in Sandwich, founded in 1563 with a strong tradition of academic excellence.",
+        "specialist_status": "Language College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Founded 1563 - Elizabethan heritage", "Language College status", "Historic school chapel", "Extensive playing fields"],
+        "founded": "1563"
     },
     {
         "name": "The Folkestone School for Girls",
@@ -411,7 +506,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.folkestonegirls.kent.sch.uk",
-        "description": "The Folkestone School for Girls is a selective girls' grammar school with a mixed sixth form. The school has strong academic results and excellent pastoral care."
+        "description": "The Folkestone School for Girls is a selective girls' grammar school with a mixed sixth form and strong academic results.",
+        "specialist_status": "Arts College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Arts College status", "Outstanding creative arts", "Channel proximity for French links", "Strong pastoral support"],
+        "founded": "1905"
     },
     {
         "name": "The Harvey Grammar School",
@@ -425,7 +524,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "2 applicants for every place",
         "competition_ratio": 2.0,
         "website": "http://www.harveygs.kent.sch.uk",
-        "description": "The Harvey Grammar School is a selective boys' grammar school in Folkestone with a mixed sixth form. The school has strong links with local businesses."
+        "description": "The Harvey Grammar School is a selective boys' grammar school in Folkestone with a mixed sixth form and strong links with local businesses.",
+        "specialist_status": "Business and Enterprise",
+        "sixth_form": "Co-educational",
+        "highlights": ["Business & Enterprise status", "Industry partnerships", "Strong cricket tradition", "Named after William Harvey (blood circulation)"],
+        "founded": "1674"
     },
     {
         "name": "The Norton Knatchbull School",
@@ -439,7 +542,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "3 applicants for every place",
         "competition_ratio": 3.0,
         "website": "http://www.nks.kent.sch.uk",
-        "description": "The Norton Knatchbull School is a selective boys' grammar school in Ashford with a mixed sixth form. The school has specialist status in Mathematics and Computing."
+        "description": "The Norton Knatchbull School is a selective boys' grammar school in Ashford with specialist status in Mathematics and Computing.",
+        "specialist_status": "Mathematics and Computing",
+        "sixth_form": "Co-educational",
+        "highlights": ["Maths & Computing specialist", "Strong programming clubs", "Robotics competitions", "Award-winning STEM projects"],
+        "founded": "1635"
     },
     {
         "name": "The Skinners' School",
@@ -453,7 +560,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "5 applicants for every place",
         "competition_ratio": 5.0,
         "website": "http://www.skinners-school.co.uk",
-        "description": "The Skinners' School is a highly selective boys' grammar school in Tunbridge Wells. The school has excellent academic results and strong sporting traditions."
+        "description": "The Skinners' School is a highly selective boys' grammar school in Tunbridge Wells with excellent academic results and strong sporting traditions.",
+        "specialist_status": "Mathematics and Computing",
+        "sixth_form": "Boys only with joint sixth form activities",
+        "highlights": ["Founded by Skinners' Company", "Outstanding academic results", "Strong rugby and rowing", "Historic links to City of London"],
+        "founded": "1887"
     },
     {
         "name": "Tonbridge Grammar School",
@@ -467,7 +578,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "5 applicants for every place",
         "competition_ratio": 5.0,
         "website": "http://www.tgs.kent.sch.uk",
-        "description": "Tonbridge Grammar School is a selective girls' grammar school in Tonbridge. The school has outstanding academic results and a strong focus on student wellbeing."
+        "description": "Tonbridge Grammar School is a selective girls' grammar school with outstanding academic results and a strong focus on student wellbeing.",
+        "specialist_status": "Language College",
+        "sixth_form": "Girls only",
+        "highlights": ["Outstanding Ofsted rating", "Language College status", "Japanese exchange program", "Extensive wellbeing support"],
+        "founded": "1905"
     },
     {
         "name": "Tunbridge Wells Girls' Grammar School",
@@ -481,7 +596,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "5 applicants for every place",
         "competition_ratio": 5.0,
         "website": "http://www.twggs.kent.sch.uk",
-        "description": "Tunbridge Wells Girls' Grammar School is a highly selective girls' grammar school. The school has excellent academic results and strong music and drama programs."
+        "description": "Tunbridge Wells Girls' Grammar School is a highly selective girls' grammar school with excellent academic results and strong music and drama programs.",
+        "specialist_status": "Music College",
+        "sixth_form": "Girls only",
+        "highlights": ["Music College status", "Outstanding orchestra", "Award-winning drama", "Strong Oxbridge record"],
+        "founded": "1905"
     },
     {
         "name": "Tunbridge Wells Grammar School for Boys",
@@ -495,7 +614,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "5 applicants for every place",
         "competition_ratio": 5.0,
         "website": "http://www.twgsb.org.uk",
-        "description": "Tunbridge Wells Grammar School for Boys is a selective boys' grammar school with a mixed sixth form. The school has strong academic and sporting traditions."
+        "description": "Tunbridge Wells Grammar School for Boys is a selective boys' grammar school with a mixed sixth form and strong academic and sporting traditions.",
+        "specialist_status": "Science College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Science College status", "Strong STEM results", "Excellent sports facilities", "Active Combined Cadet Force"],
+        "founded": "1887"
     },
     {
         "name": "Weald of Kent Grammar School",
@@ -509,7 +632,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "5 applicants for every place",
         "competition_ratio": 5.0,
         "website": "http://www.wealdofkent.kent.sch.uk",
-        "description": "Weald of Kent Grammar School is a selective girls' grammar school with annexes in Tonbridge and Sevenoaks. It is one of the largest grammar schools in Kent."
+        "description": "Weald of Kent Grammar School is a selective girls' grammar school with annexes in Tonbridge and Sevenoaks. It is one of the largest grammar schools in Kent.",
+        "specialist_status": "Language College",
+        "sixth_form": "Girls only",
+        "highlights": ["Largest Kent grammar school", "Two campus sites (Tonbridge & Sevenoaks)", "Language College status", "Outstanding academic results"],
+        "founded": "1906"
     },
     {
         "name": "Wilmington Grammar School for Boys",
@@ -523,7 +650,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.wgsb.kent.sch.uk",
-        "description": "Wilmington Grammar School for Boys is a selective boys' grammar school with a mixed sixth form. The school has specialist status in Mathematics and ICT."
+        "description": "Wilmington Grammar School for Boys is a selective boys' grammar school with a mixed sixth form and specialist status in Mathematics and ICT.",
+        "specialist_status": "Mathematics and ICT",
+        "sixth_form": "Co-educational",
+        "highlights": ["Maths & ICT specialist", "Modern computing facilities", "Strong engineering links", "Award-winning robotics club"],
+        "founded": "1957"
     },
     {
         "name": "Wilmington Grammar School for Girls",
@@ -537,7 +668,11 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition": "4 applicants for every place",
         "competition_ratio": 4.0,
         "website": "http://www.wgsg.co.uk",
-        "description": "Wilmington Grammar School for Girls is a selective girls' grammar school with a mixed sixth form. The school has strong academic results and excellent facilities."
+        "description": "Wilmington Grammar School for Girls is a selective girls' grammar school with a mixed sixth form and strong academic results.",
+        "specialist_status": "Science College",
+        "sixth_form": "Co-educational",
+        "highlights": ["Science College status", "Outstanding STEM results", "Modern facilities", "Strong university progression"],
+        "founded": "1957"
     }
 ]
 

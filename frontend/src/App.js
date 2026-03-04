@@ -686,28 +686,54 @@ const SchoolDetailPage = () => {
               <p className="text-stone-600 leading-relaxed">{school.description}</p>
             </div>
             
-            {/* Exam Format */}
-            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
-              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">11+ Exam Format</h2>
-              <p className="text-stone-500 mb-6">The Kent 11+ test is written by GL Assessment. All Kent grammar schools use the same exam.</p>
-              
-              <div className="space-y-4">
-                <div className="p-4 bg-stone-50 rounded-lg border border-stone-100">
-                  <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-primary" />
-                    Paper 1 - Reasoning
-                  </h3>
-                  <p className="text-stone-600 text-sm">{school.paper1_info}</p>
-                </div>
-                
-                <div className="p-4 bg-stone-50 rounded-lg border border-stone-100">
-                  <h3 className="font-semibold text-stone-900 mb-2 flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-secondary" />
-                    Paper 2 - English & Maths
-                  </h3>
-                  <p className="text-stone-600 text-sm">{school.paper2_info}</p>
+            {/* School Highlights - Unique to each school */}
+            {school.highlights && school.highlights.length > 0 && (
+              <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+                <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">What Makes Us Unique</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {school.highlights.map((highlight, index) => (
+                    <div key={index} className="flex items-start gap-3 p-4 bg-stone-50 rounded-lg">
+                      <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-primary font-bold text-sm">{index + 1}</span>
+                      </div>
+                      <p className="text-stone-700">{highlight}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
+            
+            {/* Specialist Status & Sixth Form */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">Programs & Specialisms</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {school.specialist_status && (
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trophy className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-semibold text-stone-900">Specialist Status</h3>
+                    </div>
+                    <p className="text-stone-600">{school.specialist_status}</p>
+                  </div>
+                )}
+                {school.sixth_form && (
+                  <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <GraduationCap className="h-5 w-5 text-amber-600" />
+                      <h3 className="font-semibold text-stone-900">Sixth Form</h3>
+                    </div>
+                    <p className="text-stone-600">{school.sixth_form}</p>
+                  </div>
+                )}
+              </div>
+              {school.founded && (
+                <div className="mt-4 p-4 bg-stone-50 rounded-lg border border-stone-100">
+                  <p className="text-stone-600">
+                    <span className="font-semibold text-stone-900">Founded:</span> {school.founded}
+                    {parseInt(school.founded) < 1600 && " — One of England's oldest grammar schools"}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           
