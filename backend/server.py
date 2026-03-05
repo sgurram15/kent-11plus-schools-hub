@@ -1,4 +1,6 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -11,6 +13,7 @@ import uuid
 from datetime import datetime, timezone
 
 ROOT_DIR = Path(__file__).parent
+PAPERS_DIR = ROOT_DIR / "static" / "papers"
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
@@ -997,6 +1000,27 @@ async def seed_schools():
         await db.schools.insert_one(doc)
     
     return {"message": f"Seeded {len(KENT_GRAMMAR_SCHOOLS)} schools successfully"}
+
+# Papers API endpoint
+@api_router.get("/papers/{filename}")
+async def get_paper(filename: str):
+    """Serve a practice paper PDF"""
+    file_path = PAPERS_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Paper not found")
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        filename=filename
+    )
+
+@api_router.get("/papers")
+async def list_papers():
+    """List all available practice papers"""
+    if not PAPERS_DIR.exists():
+        return {"papers": []}
+    papers = [f.name for f in PAPERS_DIR.glob("*.pdf")]
+    return {"papers": sorted(papers), "count": len(papers)}
 
 # Include the router in the main app
 app.include_router(api_router)
