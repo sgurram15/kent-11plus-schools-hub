@@ -118,8 +118,8 @@ const Footer = () => (
         <div>
           <h4 className="font-heading font-semibold text-white mb-4">Resources</h4>
           <ul className="space-y-2">
-            <li><a href="https://www.11plusguide.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">11+ Guide</a></li>
             <li><a href="https://www.kent.gov.uk/education-and-children/schools/school-places" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kent County Council</a></li>
+            <li><a href="https://www.gl-assessment.co.uk" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GL Assessment</a></li>
           </ul>
         </div>
       </div>
@@ -1109,24 +1109,24 @@ const ExamInfoPage = () => (
             <ul className="space-y-3">
               <li>
                 <a 
-                  href="https://www.11plusguide.com/grammar-school-test-areas/kent-grammar-schools/kent-11-plus-exam-format/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Kent 11+ Exam Format
-                </a>
-              </li>
-              <li>
-                <a 
                   href="https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Kent County Council
+                  Kent Test Official Info
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://www.gl-assessment.co.uk/products/11plus-series-702/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  GL Assessment 11+ Resources
                 </a>
               </li>
             </ul>
@@ -1146,126 +1146,122 @@ const ExamInfoPage = () => (
 
 // Practice Papers Page - Kent 11+ Only
 const PracticePapersPage = () => {
-  // Helper to convert external URL to local API URL
-  const getLocalPaperUrl = (externalUrl) => {
-    // Extract just the filename from the URL (everything after the last /)
-    const filename = decodeURIComponent(externalUrl.split('/').pop());
-    return `${API}/papers/${encodeURIComponent(filename)}`;
-  };
+  // Helper to generate local paper URL from filename
+  const getPaperUrl = (filename) => `${API}/papers/${encodeURIComponent(filename)}`;
 
   const glPapers = [
     {
       subject: "Maths",
       provider: "Bond",
       links: [
-        { label: "Sample Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-Maths-Sample-Paper1.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-Maths-paper-answers.pdf") }
+        { label: "Sample Paper", url: getPaperUrl("Bond-11-Plus-Maths-Sample-Paper1.pdf") },
+        { label: "Answers", url: getPaperUrl("Bond-11-Plus-Maths-paper-answers.pdf") }
       ]
     },
     {
       subject: "Maths",
       provider: "CGP CEM",
       links: [
-        { label: "Practice Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-cem-maths-free-practice-test-1.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-cem-maths-free-practice-test-answers.pdf") }
+        { label: "Practice Paper", url: getPaperUrl("cgp-11plus-cem-maths-free-practice-test-1.pdf") },
+        { label: "Answers", url: getPaperUrl("cgp-11plus-cem-maths-free-practice-test-answers.pdf") }
       ]
     },
     {
       subject: "English",
       provider: "Bond",
       links: [
-        { label: "Sample Test", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-English-Sample-Test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-English-Test-Answers.pdf") }
+        { label: "Sample Test", url: getPaperUrl("Bond-11-Plus-English-Sample-Test.pdf") },
+        { label: "Answers", url: getPaperUrl("Bond-11-Plus-English-Test-Answers.pdf") }
       ]
     },
     {
       subject: "English",
       provider: "CGP",
       links: [
-        { label: "Assessment Test", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/CGP11plusAssessmentTest_English.pdf") },
-        { label: "Answer Sheet", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/CGP11plusAssessmentTest_English_MCAnswersheet.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/CGP11plusAssessmentTest_English_Answers.pdf") }
+        { label: "Assessment Test", url: getPaperUrl("CGP11plusAssessmentTest_English.pdf") },
+        { label: "Answer Sheet", url: getPaperUrl("CGP11plusAssessmentTest_English_MCAnswersheet.pdf") },
+        { label: "Answers", url: getPaperUrl("CGP11plusAssessmentTest_English_Answers.pdf") }
       ]
     },
     {
       subject: "English",
       provider: "CSSE 2016",
       links: [
-        { label: "Exam Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/ENG-2016-PAPERS-FOR-UPLOAD-CSSE.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/ENG-2016-ANSWER-SCHEME-FOR-UPLOAD-CSSE.pdf") }
+        { label: "Exam Paper", url: getPaperUrl("ENG-2016-PAPERS-FOR-UPLOAD-CSSE.pdf") },
+        { label: "Answers", url: getPaperUrl("ENG-2016-ANSWER-SCHEME-FOR-UPLOAD-CSSE.pdf") }
       ]
     },
     {
       subject: "Verbal Reasoning",
       provider: "GL Official",
       links: [
-        { label: "Familiarisation Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/vr-1-familiarisation-test-booklet.pdf") },
-        { label: "Answer Sheet", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/vr1_answer_sheet.pdf") }
+        { label: "Familiarisation Paper", url: getPaperUrl("vr-1-familiarisation-test-booklet.pdf") },
+        { label: "Answer Sheet", url: getPaperUrl("vr1_answer_sheet.pdf") }
       ]
     },
     {
       subject: "Verbal Reasoning",
       provider: "CGP GL",
       links: [
-        { label: "Practice Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-vr-free-practice-test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-vr-free-practice-test-answers.pdf") }
+        { label: "Practice Paper", url: getPaperUrl("cgp-11plus-gl-vr-free-practice-test.pdf") },
+        { label: "Answers", url: getPaperUrl("cgp-11plus-gl-vr-free-practice-test-answers.pdf") }
       ]
     },
     {
       subject: "Verbal Reasoning",
       provider: "CGP CEM",
       links: [
-        { label: "Practice Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/CGP-11-Plus-CEM-Verbal-Reasoning-Paper.pdf") },
-        { label: "Answer Sheet", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/CGP-11-Plus-CEM-VR-Answer-Sheet.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/CGP-11-Plus-CEM-VR-Answers1.pdf") }
+        { label: "Practice Paper", url: getPaperUrl("CGP-11-Plus-CEM-Verbal-Reasoning-Paper.pdf") },
+        { label: "Answer Sheet", url: getPaperUrl("CGP-11-Plus-CEM-VR-Answer-Sheet.pdf") },
+        { label: "Answers", url: getPaperUrl("CGP-11-Plus-CEM-VR-Answers1.pdf") }
       ]
     },
     {
       subject: "Verbal Reasoning",
       provider: "Bond GL",
       links: [
-        { label: "Practice Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/k70636_vr_test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/k70647_vr_answers.pdf") }
+        { label: "Practice Paper", url: getPaperUrl("k70636_vr_test.pdf") },
+        { label: "Answers", url: getPaperUrl("k70647_vr_answers.pdf") }
       ]
     },
     {
       subject: "Non-Verbal Reasoning",
       provider: "GL Official",
       links: [
-        { label: "Familiarisation Booklet", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/nvr-1-familiarisation-test-booklet.pdf") },
-        { label: "Answer Sheet", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/nvr1_answer_sheet.pdf") }
+        { label: "Familiarisation Booklet", url: getPaperUrl("nvr-1-familiarisation-test-booklet.pdf") },
+        { label: "Answer Sheet", url: getPaperUrl("nvr1_answer_sheet.pdf") }
       ]
     },
     {
       subject: "Non-Verbal Reasoning",
       provider: "CGP GL",
       links: [
-        { label: "Sample Test", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-nvr-free-practice-test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-nvr-free-practice-test-answers.pdf") }
+        { label: "Sample Test", url: getPaperUrl("cgp-11plus-gl-nvr-free-practice-test.pdf") },
+        { label: "Answers", url: getPaperUrl("cgp-11plus-gl-nvr-free-practice-test-answers.pdf") }
       ]
     },
     {
       subject: "Non-Verbal Reasoning",
       provider: "CGP CEM",
       links: [
-        { label: "Sample Test", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-cem-nvr-free-practice-test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-cem-nvr-free-practice-test-answers.pdf") }
+        { label: "Sample Test", url: getPaperUrl("cgp-11plus-cem-nvr-free-practice-test.pdf") },
+        { label: "Answers", url: getPaperUrl("cgp-11plus-cem-nvr-free-practice-test-answers.pdf") }
       ]
     },
     {
       subject: "Non-Verbal Reasoning",
       provider: "Bond",
       links: [
-        { label: "Sample Test", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/k70635_nvr_test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/k70646_nvr_answers.pdf") }
+        { label: "Sample Test", url: getPaperUrl("k70635_nvr_test.pdf") },
+        { label: "Answers", url: getPaperUrl("k70646_nvr_answers.pdf") }
       ]
     },
     {
       subject: "CEM Full Test",
       provider: "Bond",
       links: [
-        { label: "Full Test", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-CEM-11-Plus-Practice-test.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-CEM-11-Plus-Practice-test-answers.pdf") }
+        { label: "Full Test", url: getPaperUrl("Bond-CEM-11-Plus-Practice-test.pdf") },
+        { label: "Answers", url: getPaperUrl("Bond-CEM-11-Plus-Practice-test-answers.pdf") }
       ]
     }
   ];
@@ -1398,15 +1394,6 @@ const PracticePapersPage = () => {
               <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">More Resources</h3>
               <div className="space-y-3">
                 <a 
-                  href="https://www.11plusguide.com/11-plus-papers-books/free-11-plus-papers/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline text-sm"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  11+ Guide Free Papers
-                </a>
-                <a 
                   href="https://www.gl-assessment.co.uk/products/11plus-series-702/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1443,12 +1430,8 @@ const PracticePapersPage = () => {
 
 // Independent Schools Page
 const IndependentSchoolsPage = () => {
-  // Helper to convert external URL to local API URL
-  const getLocalPaperUrl = (externalUrl) => {
-    // Extract just the filename from the URL (everything after the last /)
-    const filename = decodeURIComponent(externalUrl.split('/').pop());
-    return `${API}/papers/${encodeURIComponent(filename)}`;
-  };
+  // Helper to generate local paper URL from filename
+  const getPaperUrl = (filename) => `${API}/papers/${encodeURIComponent(filename)}`;
 
   const independentSchools = [
     {
@@ -1456,12 +1439,12 @@ const IndependentSchoolsPage = () => {
       location: "Dulwich, London",
       description: "Independent co-educational school in South London",
       maths: [
-        { label: "Maths Sample 1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Alleyns-11_Maths_Sample_Examination_Paper_1.pdf") },
-        { label: "Maths Sample 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Alleyns-11_Maths_Sample_Examination_Paper_2.pdf") }
+        { label: "Maths Sample 1", url: getPaperUrl("Alleyns-11_Maths_Sample_Examination_Paper_1.pdf") },
+        { label: "Maths Sample 2", url: getPaperUrl("Alleyns-11_Maths_Sample_Examination_Paper_2.pdf") }
       ],
       english: [
-        { label: "English Sample 1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11_English_Sample_Examination_Paper_1-Alleyns.pdf") },
-        { label: "English Sample 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11_English_Sample_Examination_Paper_2-Alleyns.pdf") }
+        { label: "English Sample 1", url: getPaperUrl("11_English_Sample_Examination_Paper_1-Alleyns.pdf") },
+        { label: "English Sample 2", url: getPaperUrl("11_English_Sample_Examination_Paper_2-Alleyns.pdf") }
       ]
     },
     {
@@ -1469,15 +1452,15 @@ const IndependentSchoolsPage = () => {
       location: "Woodford Green, Essex",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Bancrofts-2017-11-Maths-Complete-1.pdf") },
-        { label: "Maths 2016", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-Mathematics-Sample-Paper-from-January-2016-Bancrofts.pdf") },
-        { label: "Maths Sample", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-bancrofts-school-sample-paper-Year-unknown....pdf") }
+        { label: "Maths 2017", url: getPaperUrl("Bancrofts-2017-11-Maths-Complete-1.pdf") },
+        { label: "Maths 2016", url: getPaperUrl("11-Mathematics-Sample-Paper-from-January-2016-Bancrofts.pdf") },
+        { label: "Maths Sample", url: getPaperUrl("11-maths-bancrofts-school-sample-paper-Year-unknown....pdf") }
       ],
       english: [
-        { label: "English 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/2017-11-English-Paper-complete-Bancrofts.pdf") },
-        { label: "English 2016", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-English-Sample-Paper-from-January-2016-Bancrofts.pdf") },
-        { label: "English Sample 1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-bancrofts-school-sample-paper-1.pdf") },
-        { label: "English Sample 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-bancrofts-school-sample-paper-2.pdf") }
+        { label: "English 2017", url: getPaperUrl("2017-11-English-Paper-complete-Bancrofts.pdf") },
+        { label: "English 2016", url: getPaperUrl("11-English-Sample-Paper-from-January-2016-Bancrofts.pdf") },
+        { label: "English Sample 1", url: getPaperUrl("11-english-bancrofts-school-sample-paper-1.pdf") },
+        { label: "English Sample 2", url: getPaperUrl("11-english-bancrofts-school-sample-paper-2.pdf") }
       ]
     },
     {
@@ -1485,11 +1468,11 @@ const IndependentSchoolsPage = () => {
       location: "London",
       description: "Independent boys' school near St Paul's Cathedral",
       maths: [
-        { label: "Maths 2018", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/City-of-London-11plus_Specimen_Maths_Jul18.pdf") }
+        { label: "Maths 2018", url: getPaperUrl("City-of-London-11plus_Specimen_Maths_Jul18.pdf") }
       ],
       english: [
-        { label: "English 2018", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11plus_Specimen_English_Jul18-City-of-London.pdf") },
-        { label: "English Sample", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-city-of-london-school.pdf") }
+        { label: "English 2018", url: getPaperUrl("11plus_Specimen_English_Jul18-City-of-London.pdf") },
+        { label: "English Sample", url: getPaperUrl("11-english-city-of-london-school.pdf") }
       ]
     },
     {
@@ -1497,20 +1480,20 @@ const IndependentSchoolsPage = () => {
       location: "Dulwich, London",
       description: "Independent boys' school with extensive past papers",
       maths: [
-        { label: "Maths A", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-11-Plus-Maths-Paper-A.pdf") },
-        { label: "Maths A Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-Maths-Paper-A-Mark-Scheme.pdf") },
-        { label: "Maths B", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-11-Plus-Maths-Paper-B.pdf") },
-        { label: "Maths B Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-11-Plus-Maths-Paper-B-Mark-Scheme.pdf") },
-        { label: "Maths C", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Dulwich-year-7-maths-specimen-paper-c.pdf") },
-        { label: "Maths D", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Dulwich-year-7-maths-specimen-paper-d.pdf") },
-        { label: "Maths E", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Dulwich-year-7-maths-specimen-paper-e.pdf") },
-        { label: "Maths F", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/Dulwich-year-7-maths-specimen-paper-f.pdf") }
+        { label: "Maths A", url: getPaperUrl("Dulwich-College-11-Plus-Maths-Paper-A.pdf") },
+        { label: "Maths A Answers", url: getPaperUrl("Dulwich-College-Maths-Paper-A-Mark-Scheme.pdf") },
+        { label: "Maths B", url: getPaperUrl("Dulwich-College-11-Plus-Maths-Paper-B.pdf") },
+        { label: "Maths B Answers", url: getPaperUrl("Dulwich-College-11-Plus-Maths-Paper-B-Mark-Scheme.pdf") },
+        { label: "Maths C", url: getPaperUrl("Dulwich-year-7-maths-specimen-paper-c.pdf") },
+        { label: "Maths D", url: getPaperUrl("Dulwich-year-7-maths-specimen-paper-d.pdf") },
+        { label: "Maths E", url: getPaperUrl("Dulwich-year-7-maths-specimen-paper-e.pdf") },
+        { label: "Maths F", url: getPaperUrl("Dulwich-year-7-maths-specimen-paper-f.pdf") }
       ],
       english: [
-        { label: "English A", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-11-Plus-English-Paper-A.pdf") },
-        { label: "English B", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-11-Plus-English-Paper-B.pdf") },
-        { label: "English C", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-dulwich-college-specimen-paper-c.pdf") },
-        { label: "English 2009", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-dulwich-college.pdf") }
+        { label: "English A", url: getPaperUrl("Dulwich-College-11-Plus-English-Paper-A.pdf") },
+        { label: "English B", url: getPaperUrl("Dulwich-College-11-Plus-English-Paper-B.pdf") },
+        { label: "English C", url: getPaperUrl("11-english-dulwich-college-specimen-paper-c.pdf") },
+        { label: "English 2009", url: getPaperUrl("11-english-dulwich-college.pdf") }
       ]
     },
     {
@@ -1518,12 +1501,12 @@ const IndependentSchoolsPage = () => {
       location: "Elstree, Hertfordshire",
       description: "Leading independent boys' school",
       maths: [
-        { label: "Maths 2013", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Haberdahers-Askes-Boys-11-Plus-Maths-Paper-A.pdf") },
-        { label: "Maths 2011", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-haberdashers-askes-boys-school-2011-1.pdf") }
+        { label: "Maths 2013", url: getPaperUrl("Haberdahers-Askes-Boys-11-Plus-Maths-Paper-A.pdf") },
+        { label: "Maths 2011", url: getPaperUrl("11-maths-haberdashers-askes-boys-school-2011-1.pdf") }
       ],
       english: [
-        { label: "English 2013", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Haberdashers-Askes-Boys-11-Plus-English-Paper-A.pdf") },
-        { label: "English 2011", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-haberdashers-aske-boys-school-2011.pdf") }
+        { label: "English 2013", url: getPaperUrl("Haberdashers-Askes-Boys-11-Plus-English-Paper-A.pdf") },
+        { label: "English 2011", url: getPaperUrl("11-english-haberdashers-aske-boys-school-2011.pdf") }
       ]
     },
     {
@@ -1531,7 +1514,7 @@ const IndependentSchoolsPage = () => {
       location: "Highgate, London",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths 2013", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-highgate-school-2013.pdf") }
+        { label: "Maths 2013", url: getPaperUrl("11-maths-highgate-school-2013.pdf") }
       ],
       english: []
     },
@@ -1540,15 +1523,15 @@ const IndependentSchoolsPage = () => {
       location: "Wimbledon, London",
       description: "Independent boys' school with co-ed sixth form",
       maths: [
-        { label: "Maths Section A 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-section-a-kings-college-school-wimbledon-2017.pdf") },
-        { label: "Maths Section B 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-section-b-kings-college-school-wimbledon-2017.pdf") },
-        { label: "Maths 2014", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-kings-college-school-wimbledon-2014.pdf") }
+        { label: "Maths Section A 2017", url: getPaperUrl("11-maths-section-a-kings-college-school-wimbledon-2017.pdf") },
+        { label: "Maths Section B 2017", url: getPaperUrl("11-maths-section-b-kings-college-school-wimbledon-2017.pdf") },
+        { label: "Maths 2014", url: getPaperUrl("11-maths-kings-college-school-wimbledon-2014.pdf") }
       ],
       english: [
-        { label: "Reading 2015", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-reading-kings-college-school-wimbledon-2015.pdf") },
-        { label: "Writing 2015", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-writing-kings-college-school-wimbledon-2015.pdf") },
-        { label: "Section A 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-section-a-kings-college-school-wimbledon-2017-and-pre-test-2019.pdf") },
-        { label: "Section B 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-section-b-kings-college-school-wimbledon-2017-and-pre-test-2019.pdf") }
+        { label: "Reading 2015", url: getPaperUrl("11-english-reading-kings-college-school-wimbledon-2015.pdf") },
+        { label: "Writing 2015", url: getPaperUrl("11-english-writing-kings-college-school-wimbledon-2015.pdf") },
+        { label: "Section A 2017", url: getPaperUrl("11-english-section-a-kings-college-school-wimbledon-2017-and-pre-test-2019.pdf") },
+        { label: "Section B 2017", url: getPaperUrl("11-english-section-b-kings-college-school-wimbledon-2017-and-pre-test-2019.pdf") }
       ]
     },
     {
@@ -1556,21 +1539,21 @@ const IndependentSchoolsPage = () => {
       location: "Manchester",
       description: "Independent boys' day school, one of the largest in the UK",
       maths: [
-        { label: "Maths A 2018", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-2018-Arithmetic-Section-A.pdf") },
-        { label: "Maths A 2018 Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-2018-Arithmetic-Section-A-Answers.pdf") },
-        { label: "Maths B 2018", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-2018-Arithmetic-Section-B.pdf") },
-        { label: "Maths B 2018 Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-2018-Arithmetic-Section-B-Answers.pdf") },
-        { label: "Maths A 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-2017-Arithmetic-Section-A.pdf") },
-        { label: "Maths B 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-2017-Arithmetic-Section-B.pdf") },
-        { label: "Maths A 2016", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-Arithmetic-Section-A-2016.pdf") },
-        { label: "Maths B 2016", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/MG-Arithmetic-Section-B-2016.pdf") }
+        { label: "Maths A 2018", url: getPaperUrl("MG-2018-Arithmetic-Section-A.pdf") },
+        { label: "Maths A 2018 Answers", url: getPaperUrl("MG-2018-Arithmetic-Section-A-Answers.pdf") },
+        { label: "Maths B 2018", url: getPaperUrl("MG-2018-Arithmetic-Section-B.pdf") },
+        { label: "Maths B 2018 Answers", url: getPaperUrl("MG-2018-Arithmetic-Section-B-Answers.pdf") },
+        { label: "Maths A 2017", url: getPaperUrl("MG-2017-Arithmetic-Section-A.pdf") },
+        { label: "Maths B 2017", url: getPaperUrl("MG-2017-Arithmetic-Section-B.pdf") },
+        { label: "Maths A 2016", url: getPaperUrl("MG-Arithmetic-Section-A-2016.pdf") },
+        { label: "Maths B 2016", url: getPaperUrl("MG-Arithmetic-Section-B-2016.pdf") }
       ],
       english: [
-        { label: "English A 2018", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/2018-English-Section-A.pdf") },
-        { label: "English A 2018 Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/2018-English-Section-A-Answers.pdf") },
-        { label: "Comprehension 2018", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/2018-English-Comprehension-Passage.pdf") },
-        { label: "English A 2017", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/2017-English-Paper-Section-A.pdf") },
-        { label: "English A 2016", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/English-Section-A-2016.pdf") }
+        { label: "English A 2018", url: getPaperUrl("2018-English-Section-A.pdf") },
+        { label: "English A 2018 Answers", url: getPaperUrl("2018-English-Section-A-Answers.pdf") },
+        { label: "Comprehension 2018", url: getPaperUrl("2018-English-Comprehension-Passage.pdf") },
+        { label: "English A 2017", url: getPaperUrl("2017-English-Paper-Section-A.pdf") },
+        { label: "English A 2016", url: getPaperUrl("English-Section-A-2016.pdf") }
       ]
     },
     {
@@ -1578,12 +1561,12 @@ const IndependentSchoolsPage = () => {
       location: "Northwood, Middlesex",
       description: "Independent boys' school",
       maths: [
-        { label: "Maths Specimen 1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/merchant-taylors-11plus_Maths_specimen_1.pdf") },
-        { label: "Maths Specimen 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/merchant-taylors-11plus_Maths_specimen_2.pdf") }
+        { label: "Maths Specimen 1", url: getPaperUrl("merchant-taylors-11plus_Maths_specimen_1.pdf") },
+        { label: "Maths Specimen 2", url: getPaperUrl("merchant-taylors-11plus_Maths_specimen_2.pdf") }
       ],
       english: [
-        { label: "English 2010", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11__English_Entrance_Exam_10-Merchant-Taylors.pdf") },
-        { label: "English Practice", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11__English_practice_paper-Merchant-Taylors.pdf") }
+        { label: "English 2010", url: getPaperUrl("11__English_Entrance_Exam_10-Merchant-Taylors.pdf") },
+        { label: "English Practice", url: getPaperUrl("11__English_practice_paper-Merchant-Taylors.pdf") }
       ]
     },
     {
@@ -1591,19 +1574,19 @@ const IndependentSchoolsPage = () => {
       location: "London",
       description: "Group of independent girls' schools including Notting Hill & Ealing, Godolphin & Latymer",
       maths: [
-        { label: "Maths 2016 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-group-1-notting-hill-ealing-high-school-2016-group-1.pdf") },
-        { label: "Maths 2016 G2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-godolphin-latymer-2016-group-2.pdf") },
-        { label: "Maths 2015 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-notting-hill-ealing-high-school-2015-group-1.pdf") },
-        { label: "Maths 2015 G2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-godolphin-latymer-2015-group-2.pdf") },
-        { label: "Maths 2014 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-notting-hill-ealing-high-school-2014-group-1.pdf") },
-        { label: "Maths 2013 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-notting-hill-ealing-high-school-2013-group-1.pdf") }
+        { label: "Maths 2016 G1", url: getPaperUrl("11-maths-group-1-notting-hill-ealing-high-school-2016-group-1.pdf") },
+        { label: "Maths 2016 G2", url: getPaperUrl("11-maths-godolphin-latymer-2016-group-2.pdf") },
+        { label: "Maths 2015 G1", url: getPaperUrl("11-maths-notting-hill-ealing-high-school-2015-group-1.pdf") },
+        { label: "Maths 2015 G2", url: getPaperUrl("11-maths-godolphin-latymer-2015-group-2.pdf") },
+        { label: "Maths 2014 G1", url: getPaperUrl("11-maths-notting-hill-ealing-high-school-2014-group-1.pdf") },
+        { label: "Maths 2013 G1", url: getPaperUrl("11-maths-notting-hill-ealing-high-school-2013-group-1.pdf") }
       ],
       english: [
-        { label: "English 2016 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-group-1-notting-hill-ealing-high-school-2016.pdf") },
-        { label: "English 2016 G2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-north-london-independent-girls-schools-consortium-2016.pdf") },
-        { label: "English 2015 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-notting-hill-ealing-high-school-2015.pdf") },
-        { label: "English 2014 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-notting-hill-ealing-high-school-2014.pdf") },
-        { label: "English 2013 G1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-notting-hill-ealing-high-school-2013.pdf") }
+        { label: "English 2016 G1", url: getPaperUrl("11-english-group-1-notting-hill-ealing-high-school-2016.pdf") },
+        { label: "English 2016 G2", url: getPaperUrl("11-english-north-london-independent-girls-schools-consortium-2016.pdf") },
+        { label: "English 2015 G1", url: getPaperUrl("11-english-notting-hill-ealing-high-school-2015.pdf") },
+        { label: "English 2014 G1", url: getPaperUrl("11-english-notting-hill-ealing-high-school-2014.pdf") },
+        { label: "English 2013 G1", url: getPaperUrl("11-english-notting-hill-ealing-high-school-2013.pdf") }
       ]
     },
     {
@@ -1611,17 +1594,17 @@ const IndependentSchoolsPage = () => {
       location: "Cambridge",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths Sample A", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-specimen-paper-1-the-perse-upper-school-cambridge-year-unknown.pdf") },
-        { label: "Maths Sample B", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-specimen-paper-2-the-perse-upper-school-cambridge-year-unknown.pdf") },
-        { label: "Maths Sample C", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-specimen-paper-3-the-perse-upper-school-cambridge-year-unknown.pdf") },
-        { label: "Maths Sample D", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-specimen-paper-4-the-perse-upper-school-cambridge-year-unknown.pdf") },
-        { label: "Maths Sample E", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-specimen-paper-5-the-perse-upper-school-cambridge-year-unknown.pdf") }
+        { label: "Maths Sample A", url: getPaperUrl("11-maths-specimen-paper-1-the-perse-upper-school-cambridge-year-unknown.pdf") },
+        { label: "Maths Sample B", url: getPaperUrl("11-maths-specimen-paper-2-the-perse-upper-school-cambridge-year-unknown.pdf") },
+        { label: "Maths Sample C", url: getPaperUrl("11-maths-specimen-paper-3-the-perse-upper-school-cambridge-year-unknown.pdf") },
+        { label: "Maths Sample D", url: getPaperUrl("11-maths-specimen-paper-4-the-perse-upper-school-cambridge-year-unknown.pdf") },
+        { label: "Maths Sample E", url: getPaperUrl("11-maths-specimen-paper-5-the-perse-upper-school-cambridge-year-unknown.pdf") }
       ],
       english: [
-        { label: "English Sample 1", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-specimen-paper-1-the-perse-upper-school-cambridge.pdf") },
-        { label: "English Sample 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-specimen-paper-2-the-perse-upper-school-cambridge.pdf") },
-        { label: "English Sample 3", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-specimen-paper-3-the-perse-upper-school-cambridge.pdf") },
-        { label: "English Sample 4", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-specimen-paper-4-the-perse-upper-school-cambridge.pdf") }
+        { label: "English Sample 1", url: getPaperUrl("11-english-specimen-paper-1-the-perse-upper-school-cambridge.pdf") },
+        { label: "English Sample 2", url: getPaperUrl("11-english-specimen-paper-2-the-perse-upper-school-cambridge.pdf") },
+        { label: "English Sample 3", url: getPaperUrl("11-english-specimen-paper-3-the-perse-upper-school-cambridge.pdf") },
+        { label: "English Sample 4", url: getPaperUrl("11-english-specimen-paper-4-the-perse-upper-school-cambridge.pdf") }
       ]
     },
     {
@@ -1630,8 +1613,8 @@ const IndependentSchoolsPage = () => {
       description: "Leading independent girls' school",
       maths: [],
       english: [
-        { label: "English Paper 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/St-Pauls-Girls-school-11-Plus-English-paper-2.pdf") },
-        { label: "Comprehension Paper 2", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/St-Pauls-Girls-School-English-Comprehension-Paper-2.pdf") }
+        { label: "English Paper 2", url: getPaperUrl("St-Pauls-Girls-school-11-Plus-English-paper-2.pdf") },
+        { label: "Comprehension Paper 2", url: getPaperUrl("St-Pauls-Girls-School-English-Comprehension-Paper-2.pdf") }
       ]
     },
     {
@@ -1639,12 +1622,12 @@ const IndependentSchoolsPage = () => {
       location: "Battersea, London",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths 2013", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-emanuel-2013.pdf") }
+        { label: "Maths 2013", url: getPaperUrl("11-maths-emanuel-2013.pdf") }
       ],
       english: [
-        { label: "English 2012", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-emanuel-school-2012.pdf") },
-        { label: "English 2011", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/Emanuel-School-11-Plus-English-Paper-1.pdf") },
-        { label: "English 2010", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-emanuel-2010.pdf") }
+        { label: "English 2012", url: getPaperUrl("11-english-emanuel-school-2012.pdf") },
+        { label: "English 2011", url: getPaperUrl("Emanuel-School-11-Plus-English-Paper-1.pdf") },
+        { label: "English 2010", url: getPaperUrl("11-english-emanuel-2010.pdf") }
       ]
     },
     {
@@ -1652,16 +1635,16 @@ const IndependentSchoolsPage = () => {
       location: "National",
       description: "Independent Schools Examinations Board - used by many schools",
       maths: [
-        { label: "Maths 2016", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-mathematics-iseb-2016.pdf") },
-        { label: "Maths 2016 Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-mathematics-mark-scheme-iseb-2016.pdf") },
-        { label: "Maths 2009", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-iseb-2009.pdf") },
-        { label: "Maths 2008", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-iseb-2008-1.pdf") }
+        { label: "Maths 2016", url: getPaperUrl("11-mathematics-iseb-2016.pdf") },
+        { label: "Maths 2016 Answers", url: getPaperUrl("11-mathematics-mark-scheme-iseb-2016.pdf") },
+        { label: "Maths 2009", url: getPaperUrl("11-maths-iseb-2009.pdf") },
+        { label: "Maths 2008", url: getPaperUrl("11-maths-iseb-2008-1.pdf") }
       ],
       english: [
-        { label: "English Paper 1 2009", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-paper-1-iseb-2009.pdf") },
-        { label: "English Paper 2 2009", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-paper-2-iseb-2009.pdf") },
-        { label: "English Paper 1 2008", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-paper-1-iseb-2008.pdf") },
-        { label: "English Paper 2 2008", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-paper-2-iseb-2008.pdf") }
+        { label: "English Paper 1 2009", url: getPaperUrl("11-english-paper-1-iseb-2009.pdf") },
+        { label: "English Paper 2 2009", url: getPaperUrl("11-english-paper-2-iseb-2009.pdf") },
+        { label: "English Paper 1 2008", url: getPaperUrl("11-english-paper-1-iseb-2008.pdf") },
+        { label: "English Paper 2 2008", url: getPaperUrl("11-english-paper-2-iseb-2008.pdf") }
       ]
     },
     {
@@ -1669,11 +1652,11 @@ const IndependentSchoolsPage = () => {
       location: "Chester",
       description: "Independent school in Chester",
       maths: [
-        { label: "Maths Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/The-Kings-School-Chester-11-Plus-Maths-Paper.pdf") }
+        { label: "Maths Paper", url: getPaperUrl("The-Kings-School-Chester-11-Plus-Maths-Paper.pdf") }
       ],
       english: [
-        { label: "Comprehension", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/The-Kings-School-Chester-11-Plus-English-Question-Paper.pdf") },
-        { label: "Passage", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2014/10/The-Kings-School-Chester-11-Plus-English-Texts-for-Question-Paper.pdf") }
+        { label: "Comprehension", url: getPaperUrl("The-Kings-School-Chester-11-Plus-English-Question-Paper.pdf") },
+        { label: "Passage", url: getPaperUrl("The-Kings-School-Chester-11-Plus-English-Texts-for-Question-Paper.pdf") }
       ]
     },
     {
@@ -1681,11 +1664,11 @@ const IndependentSchoolsPage = () => {
       location: "Reigate, Surrey",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths 2013", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-reigate-2013.pdf") },
-        { label: "Maths 2012", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-reigate-grammar-school-2012.pdf") }
+        { label: "Maths 2013", url: getPaperUrl("11-maths-reigate-2013.pdf") },
+        { label: "Maths 2012", url: getPaperUrl("11-maths-reigate-grammar-school-2012.pdf") }
       ],
       english: [
-        { label: "English 2012", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-reigate-grammar-school-2012.pdf") }
+        { label: "English 2012", url: getPaperUrl("11-english-reigate-grammar-school-2012.pdf") }
       ]
     },
     {
@@ -1693,8 +1676,8 @@ const IndependentSchoolsPage = () => {
       location: "Potters Bar, Hertfordshire",
       description: "Selective co-educational school",
       maths: [
-        { label: "Maths Paper", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/08/Dame-Alice-Owens-School-Maths-Familiarisation-Paper-ilovepdf-compressed-1.pdf") },
-        { label: "Answers", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/08/Dame-Alice-Owens-School-Maths-Familiarisation-Paper-Answers.pdf") }
+        { label: "Maths Paper", url: getPaperUrl("Dame-Alice-Owens-School-Maths-Familiarisation-Paper-ilovepdf-compressed-1.pdf") },
+        { label: "Answers", url: getPaperUrl("Dame-Alice-Owens-School-Maths-Familiarisation-Paper-Answers.pdf") }
       ],
       english: []
     },
@@ -1703,7 +1686,7 @@ const IndependentSchoolsPage = () => {
       location: "Lee, London",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths Sample", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-colfes-school-year-unknown....pdf") }
+        { label: "Maths Sample", url: getPaperUrl("11-maths-colfes-school-year-unknown....pdf") }
       ],
       english: []
     },
@@ -1712,10 +1695,10 @@ const IndependentSchoolsPage = () => {
       location: "Canterbury, Kent",
       description: "Independent co-educational school",
       maths: [
-        { label: "Maths Sample", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-kent-college-year-unknown.pdf") }
+        { label: "Maths Sample", url: getPaperUrl("11-maths-kent-college-year-unknown.pdf") }
       ],
       english: [
-        { label: "English 2009", url: getLocalPaperUrl("https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-kent-college-2009.pdf") }
+        { label: "English 2009", url: getPaperUrl("11-english-kent-college-2009.pdf") }
       ]
     }
   ];
@@ -1862,15 +1845,6 @@ const IndependentSchoolsPage = () => {
               <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">Resources</h3>
               <div className="space-y-3">
                 <a 
-                  href="https://www.11plusguide.com/11-plus-papers-books/free-11-plus-papers/free-sample-11-plus-independent-school-papers/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline text-sm"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  More Independent Papers
-                </a>
-                <a 
                   href="https://www.iseb.co.uk/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1878,6 +1852,15 @@ const IndependentSchoolsPage = () => {
                 >
                   <ExternalLink className="h-4 w-4" />
                   ISEB Official Website
+                </a>
+                <a 
+                  href="https://www.gov.uk/school-performance-tables"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  School Performance Tables
                 </a>
               </div>
             </div>
