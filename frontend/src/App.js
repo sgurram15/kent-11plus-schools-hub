@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare, Calendar, Clock, Bell, CheckCircle, AlertCircle, FileText, Mail } from "lucide-react";
+import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare, Calendar, Clock, Bell, CheckCircle, AlertCircle, FileText, Mail, Award } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -2397,6 +2397,7 @@ const CutOffScoresPage = () => {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState('2026');
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -2416,6 +2417,16 @@ const CutOffScoresPage = () => {
     ? scores.filter(s => s.entry_year === selectedYear)
     : scores;
 
+  // Sort by inner_area_score descending, then by school name
+  const sortedScores = [...filteredScores].sort((a, b) => {
+    if (a.inner_area_score && b.inner_area_score) {
+      return b.inner_area_score - a.inner_area_score;
+    }
+    if (a.inner_area_score) return -1;
+    if (b.inner_area_score) return 1;
+    return a.school_name.localeCompare(b.school_name);
+  });
+
   const years = [...new Set(scores.map(s => s.entry_year))].sort().reverse();
 
   return (
@@ -2429,23 +2440,50 @@ const CutOffScoresPage = () => {
           <p className="text-stone-600">Historical and current admission cut-off scores for Kent grammar schools</p>
         </div>
 
-        {/* Year Filter */}
+        {/* Controls: Year Filter + View Toggle */}
         <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 mb-8">
-          <div className="flex flex-wrap gap-2">
-            <span className="text-stone-600 font-medium mr-2">Entry Year:</span>
-            {years.map(year => (
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-stone-600 font-medium mr-2">Entry Year:</span>
+              {years.map(year => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year)}
+                  className={`px-4 py-2 rounded-md font-medium transition-all ${
+                    selectedYear === year 
+                      ? 'bg-primary text-white' 
+                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-stone-600 font-medium mr-2">View:</span>
               <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={`px-4 py-2 rounded-md font-medium transition-all ${
-                  selectedYear === year 
+                onClick={() => setViewMode('table')}
+                className={`px-4 py-2 rounded-md font-medium transition-all flex items-center gap-2 ${
+                  viewMode === 'table' 
                     ? 'bg-primary text-white' 
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
+                data-testid="view-table-btn"
               >
-                {year}
+                <FileText className="h-4 w-4" /> Table
               </button>
-            ))}
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-4 py-2 rounded-md font-medium transition-all flex items-center gap-2 ${
+                  viewMode === 'cards' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+                data-testid="view-cards-btn"
+              >
+                <Award className="h-4 w-4" /> Cards
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2459,28 +2497,145 @@ const CutOffScoresPage = () => {
                 Cut-off scores vary each year based on the number of applicants and their scores. 
                 The <strong>inner area</strong> is typically closer to the school, while the <strong>outer area</strong> covers a wider catchment.
                 Some schools also have <strong>governors' places</strong> awarded by highest score regardless of distance.
-                These scores are guides only - always check the school's official admissions policy.
+                Schools marked as "Distance" allocate by proximity after Kent Test eligibility (332+ total score).
               </p>
             </div>
           </div>
         </div>
 
-        {/* Scores Grid */}
+        {/* Content */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-stone-200 h-64 animate-pulse" />
-            ))}
-          </div>
-        ) : filteredScores.length === 0 ? (
+          <div className="bg-white rounded-xl border border-stone-200 h-64 animate-pulse" />
+        ) : sortedScores.length === 0 ? (
           <div className="bg-stone-50 rounded-xl border border-dashed border-stone-300 p-12 text-center">
             <Trophy className="h-12 w-12 text-stone-400 mx-auto mb-4" />
             <p className="text-stone-500">No cut-off scores available for {selectedYear}</p>
             <p className="text-stone-400 text-sm mt-2">Data is being collected from schools. Check back soon!</p>
           </div>
+        ) : viewMode === 'table' ? (
+          /* TABLE VIEW */
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden mb-8">
+            <div className="overflow-x-auto">
+              <table className="w-full" data-testid="cut-off-scores-table">
+                <thead>
+                  <tr className="bg-gradient-to-r from-primary to-primary/90 text-white">
+                    <th className="px-4 py-4 text-left font-semibold">School</th>
+                    <th className="px-4 py-4 text-center font-semibold">Inner Area</th>
+                    <th className="px-4 py-4 text-center font-semibold">Outer Area</th>
+                    <th className="px-4 py-4 text-center font-semibold">Governors</th>
+                    <th className="px-4 py-4 text-center font-semibold">Total Places</th>
+                    <th className="px-4 py-4 text-left font-semibold">Allocation Method</th>
+                    <th className="px-4 py-4 text-center font-semibold">Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedScores.map((score, index) => (
+                    <tr 
+                      key={score.id} 
+                      className={`border-b border-stone-100 hover:bg-stone-50 transition-colors ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'
+                      }`}
+                    >
+                      <td className="px-4 py-4">
+                        <Link 
+                          to={`/schools/${score.school_slug}`}
+                          className="font-semibold text-stone-900 hover:text-primary transition-colors"
+                        >
+                          {score.school_name}
+                        </Link>
+                        <p className="text-xs text-stone-500 mt-1">Entry {score.entry_year}</p>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {score.inner_area_score ? (
+                          <span className="inline-flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-blue-100 text-blue-700 font-bold rounded-lg text-lg">
+                            {score.inner_area_score}
+                          </span>
+                        ) : (
+                          <span className="text-stone-400 text-sm">Distance</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {score.outer_area_score ? (
+                          <span className="inline-flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-purple-100 text-purple-700 font-bold rounded-lg text-lg">
+                            {score.outer_area_score}
+                          </span>
+                        ) : (
+                          <span className="text-stone-400 text-sm">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {score.governors_score ? (
+                          <span className="inline-flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-amber-100 text-amber-700 font-bold rounded-lg text-lg">
+                            {score.governors_score}
+                          </span>
+                        ) : (
+                          <span className="text-stone-400 text-sm">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="inline-flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-green-100 text-green-700 font-bold rounded-lg">
+                          {score.total_offers || '-'}
+                        </span>
+                        {(score.inner_area_places || score.outer_area_places) && (
+                          <p className="text-xs text-stone-500 mt-1">
+                            {score.inner_area_places && `In: ${score.inner_area_places}`}
+                            {score.inner_area_places && score.outer_area_places && ' / '}
+                            {score.outer_area_places && `Out: ${score.outer_area_places}`}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          score.inner_area_score 
+                            ? 'bg-blue-50 text-blue-700' 
+                            : 'bg-stone-100 text-stone-600'
+                        }`}>
+                          {score.inner_area_score ? 'Score-based' : 'Distance-based'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {score.source_url ? (
+                          <a 
+                            href={score.source_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-primary hover:underline text-sm"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <span className="text-stone-400">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Table Legend */}
+            <div className="px-4 py-3 bg-stone-50 border-t border-stone-100">
+              <div className="flex flex-wrap gap-4 text-xs text-stone-600">
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-blue-100 rounded"></span> Inner Area Score
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-purple-100 rounded"></span> Outer Area Score
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-amber-100 rounded"></span> Governors' Places
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-green-100 rounded"></span> Total Places
+                </span>
+                <span className="text-stone-500">| "Distance" = allocated by proximity, not score</span>
+              </div>
+            </div>
+          </div>
         ) : (
+          /* CARDS VIEW */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredScores.map((score) => (
+            {sortedScores.map((score) => (
               <div key={score.id} className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-primary to-primary/90 p-4 text-white">
                   <Link to={`/schools/${score.school_slug}`} className="font-heading text-lg font-semibold hover:underline">
