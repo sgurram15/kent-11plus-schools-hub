@@ -37,6 +37,9 @@ const Navigation = () => {
             <Link to="/key-dates" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-key-dates">
               Key Dates
             </Link>
+            <Link to="/practice-papers" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-practice-papers">
+              Practice Papers
+            </Link>
           </div>
           
           {/* Mobile menu button */}
@@ -68,6 +71,9 @@ const Navigation = () => {
               <Link to="/key-dates" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Key Dates
               </Link>
+              <Link to="/practice-papers" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Practice Papers
+              </Link>
             </div>
           </div>
         )}
@@ -98,6 +104,7 @@ const Footer = () => (
             <li><Link to="/compare" className="hover:text-white transition-colors">Compare Schools</Link></li>
             <li><Link to="/exam-info" className="hover:text-white transition-colors">Exam Information</Link></li>
             <li><Link to="/key-dates" className="hover:text-white transition-colors">Key Dates & Calendar</Link></li>
+            <li><Link to="/practice-papers" className="hover:text-white transition-colors">Practice Papers</Link></li>
           </ul>
         </div>
         
@@ -1064,6 +1071,332 @@ const ExamInfoPage = () => (
   </div>
 );
 
+// Practice Papers Page
+const PracticePapersPage = () => {
+  const glPapers = [
+    {
+      subject: "Maths",
+      provider: "Bond",
+      links: [
+        { label: "Sample Paper", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-Maths-Sample-Paper1.pdf" },
+        { label: "Answers", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-Maths-paper-answers.pdf" }
+      ]
+    },
+    {
+      subject: "English",
+      provider: "Bond",
+      links: [
+        { label: "Sample Test", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-English-Sample-Test.pdf" },
+        { label: "Answers", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/Bond-11-Plus-English-Test-Answers.pdf" }
+      ]
+    },
+    {
+      subject: "English",
+      provider: "CGP",
+      links: [
+        { label: "Assessment Test", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/CGP11plusAssessmentTest_English.pdf" },
+        { label: "Answer Sheet", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/CGP11plusAssessmentTest_English_MCAnswersheet.pdf" },
+        { label: "Answers", url: "https://www.11plusguide.com/wp-content/uploads/2015/08/CGP11plusAssessmentTest_English_Answers.pdf" }
+      ]
+    },
+    {
+      subject: "Verbal Reasoning",
+      provider: "GL Official",
+      links: [
+        { label: "Familiarisation Paper", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/vr-1-familiarisation-test-booklet.pdf" },
+        { label: "Answer Sheet", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/vr1_answer_sheet.pdf" }
+      ]
+    },
+    {
+      subject: "Verbal Reasoning",
+      provider: "CGP GL",
+      links: [
+        { label: "Practice Paper", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-vr-free-practice-test.pdf" },
+        { label: "Answers", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-vr-free-practice-test-answers.pdf" }
+      ]
+    },
+    {
+      subject: "Non-Verbal Reasoning",
+      provider: "GL Official",
+      links: [
+        { label: "Familiarisation Booklet", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/nvr-1-familiarisation-test-booklet.pdf" },
+        { label: "Answer Sheet", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/nvr1_answer_sheet.pdf" }
+      ]
+    },
+    {
+      subject: "Non-Verbal Reasoning",
+      provider: "CGP GL",
+      links: [
+        { label: "Sample Test", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-nvr-free-practice-test.pdf" },
+        { label: "Answers", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/cgp-11plus-gl-nvr-free-practice-test-answers.pdf" }
+      ]
+    }
+  ];
+
+  const independentPapers = [
+    {
+      school: "Bancroft's School",
+      year: "2017",
+      links: [
+        { label: "Maths", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/Bancrofts-2017-11-Maths-Complete-1.pdf" },
+        { label: "English", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/2017-11-English-Paper-complete-Bancrofts.pdf" }
+      ]
+    },
+    {
+      school: "City of London School",
+      year: "2018",
+      links: [
+        { label: "English", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/11plus_Specimen_English_Jul18-City-of-London.pdf" },
+        { label: "Maths", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/City-of-London-11plus_Specimen_Maths_Jul18.pdf" }
+      ]
+    },
+    {
+      school: "Dulwich College",
+      year: "Sample",
+      links: [
+        { label: "Maths Paper A", url: "https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-11-Plus-Maths-Paper-A.pdf" },
+        { label: "Mark Scheme", url: "https://www.11plusguide.com/wp-content/uploads/2014/10/Dulwich-College-Maths-Paper-A-Mark-Scheme.pdf" }
+      ]
+    },
+    {
+      school: "Dame Alice Owen's School",
+      year: "Sample",
+      links: [
+        { label: "Maths Paper", url: "https://www.11plusguide.com/wp-content/uploads/2018/08/Dame-Alice-Owens-School-Maths-Familiarisation-Paper-ilovepdf-compressed-1.pdf" },
+        { label: "Answers", url: "https://www.11plusguide.com/wp-content/uploads/2018/08/Dame-Alice-Owens-School-Maths-Familiarisation-Paper-Answers.pdf" }
+      ]
+    },
+    {
+      school: "Alleyn's School",
+      year: "Sample",
+      links: [
+        { label: "English Paper", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/11_English_Sample_Examination_Paper_1-Alleyns.pdf" }
+      ]
+    },
+    {
+      school: "North London Girls' Consortium",
+      year: "2016",
+      links: [
+        { label: "Maths", url: "https://www.11plusguide.com/wp-content/uploads/2019/01/11-maths-group-1-notting-hill-ealing-high-school-2016-group-1.pdf" },
+        { label: "English", url: "https://www.11plusguide.com/wp-content/uploads/2018/10/11-english-group-1-notting-hill-ealing-high-school-2016.pdf" }
+      ]
+    }
+  ];
+
+  const getSubjectColor = (subject) => {
+    switch(subject) {
+      case "Maths": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "English": return "bg-green-100 text-green-700 border-green-200";
+      case "Verbal Reasoning": return "bg-purple-100 text-purple-700 border-purple-200";
+      case "Non-Verbal Reasoning": return "bg-amber-100 text-amber-700 border-amber-200";
+      default: return "bg-stone-100 text-stone-700 border-stone-200";
+    }
+  };
+
+  return (
+    <div className="min-h-screen py-8" data-testid="practice-papers-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            Free Practice Papers
+          </h1>
+          <p className="text-stone-600">Free 11+ practice papers to help prepare for the Kent Test</p>
+        </div>
+
+        {/* Important Note */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-stone-900 mb-1">Important Note</h3>
+              <p className="text-stone-600 text-sm">
+                These free papers are useful for understanding the test format, but should not be used as your only preparation. 
+                Kent uses GL Assessment papers. We recommend using these alongside structured learning resources for best results.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* GL Papers - Relevant for Kent */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-heading text-2xl font-semibold text-stone-900">GL Assessment Papers</h2>
+                  <p className="text-sm text-stone-500">Used by all Kent grammar schools</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {glPapers.map((paper, index) => (
+                  <div key={index} className="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded border ${getSubjectColor(paper.subject)}`}>
+                        {paper.subject}
+                      </span>
+                      <span className="text-sm text-stone-500">by {paper.provider}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {paper.links.map((link, linkIndex) => (
+                        <a
+                          key={linkIndex}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-stone-200 rounded-md text-sm text-primary hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Independent School Papers */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-secondary/10 rounded-lg">
+                  <Building2 className="h-6 w-6 text-secondary" />
+                </div>
+                <div>
+                  <h2 className="font-heading text-2xl font-semibold text-stone-900">Independent School Papers</h2>
+                  <p className="text-sm text-stone-500">Sample papers from independent schools</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {independentPapers.map((paper, index) => (
+                  <div key={index} className="p-4 bg-stone-50 rounded-lg border border-stone-100">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <h3 className="font-semibold text-stone-900">{paper.school}</h3>
+                      <span className="text-xs font-medium text-stone-500 bg-stone-200 px-2 py-1 rounded">
+                        {paper.year}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {paper.links.map((link, linkIndex) => (
+                        <a
+                          key={linkIndex}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-stone-200 rounded-md text-sm text-secondary hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Kent Test Format */}
+            <div className="bg-primary text-white rounded-xl p-6">
+              <h3 className="font-heading text-xl font-semibold mb-4">Kent Test Format</h3>
+              <div className="space-y-4 text-sm">
+                <div className="p-3 bg-white/10 rounded-lg">
+                  <p className="font-semibold mb-1">Paper 1 - Reasoning (50 mins)</p>
+                  <ul className="text-white/80 space-y-1">
+                    <li>• Verbal Reasoning (25 mins)</li>
+                    <li>• Spatial Reasoning (10 mins)</li>
+                    <li>• Non-Verbal Reasoning (15 mins)</li>
+                  </ul>
+                </div>
+                <div className="p-3 bg-white/10 rounded-lg">
+                  <p className="font-semibold mb-1">Paper 2 - Core Subjects (60 mins)</p>
+                  <ul className="text-white/80 space-y-1">
+                    <li>• English (30 mins)</li>
+                    <li>• Mathematics (30 mins)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Subject Guide */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">Subject Focus Areas</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm text-stone-600">Maths - Arithmetic, Problem Solving</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm text-stone-600">English - Comprehension, Grammar</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                  <span className="text-sm text-stone-600">VR - Word Patterns, Logic</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                  <span className="text-sm text-stone-600">NVR - Shapes, Sequences</span>
+                </div>
+              </div>
+            </div>
+
+            {/* External Resources */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">More Resources</h3>
+              <div className="space-y-3">
+                <a 
+                  href="https://www.11plusguide.com/11-plus-papers-books/free-11-plus-papers/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  11+ Guide Free Papers
+                </a>
+                <a 
+                  href="https://www.gl-assessment.co.uk/products/11plus-series-702/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  GL Assessment Official
+                </a>
+                <a 
+                  href="https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test/prepare-for-the-kent-test"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Kent Council Preparation Guide
+                </a>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <Link 
+              to="/schools"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-secondary/90 transition-all btn-press"
+            >
+              Browse All Schools <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Key Dates Page
 const KeyDatesPage = () => {
   const today = new Date();
@@ -1409,6 +1742,7 @@ function App() {
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/exam-info" element={<ExamInfoPage />} />
             <Route path="/key-dates" element={<KeyDatesPage />} />
+            <Route path="/practice-papers" element={<PracticePapersPage />} />
           </Routes>
         </main>
         <Footer />
