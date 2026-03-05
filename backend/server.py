@@ -27,6 +27,11 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Health check endpoint (for Railway/Render)
+@api_router.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "kent-11plus-api"}
+
 # Define Models
 class School(BaseModel):
     model_config = ConfigDict(extra="ignore")
