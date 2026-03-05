@@ -961,15 +961,15 @@ const ComparePage = () => {
                 </thead>
                 <tbody>
                   {compareFields.map((field, index) => (
-                    <>
+                    <React.Fragment key={`field-${index}-${field.key}`}>
                       {field.section && (
-                        <tr key={`section-${field.section}`} className="bg-primary/5">
+                        <tr className="bg-primary/5">
                           <td colSpan={selectedSchools.length + 1} className="p-3 font-semibold text-primary text-sm uppercase tracking-wide">
                             {field.section}
                           </td>
                         </tr>
                       )}
-                      <tr key={field.key} className={`border-b border-stone-100 last:border-0 ${field.highlight ? 'bg-amber-50/50' : ''}`}>
+                      <tr className={`border-b border-stone-100 last:border-0 ${field.highlight ? 'bg-amber-50/50' : ''}`}>
                         <td className="p-4 text-stone-600 font-medium">
                           {field.label}
                           {field.highlight && <span className="ml-1 text-xs text-amber-600">★</span>}
@@ -980,7 +980,7 @@ const ComparePage = () => {
                           </td>
                         ))}
                       </tr>
-                    </>
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
