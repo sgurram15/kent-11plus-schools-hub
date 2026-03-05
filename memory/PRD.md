@@ -142,6 +142,6 @@ Build a website for Kent 11+ admissions that includes:
 - Some academic data may be from different years
 
 ## Deployment
-- Preview URL: https://school-picker.preview.emergentagent.com
+- Preview URL: https://kent-11-plus-hub.preview.emergentagent.com
 - Deployment health check: Passed
 - GitHub: Code pushed to user repository

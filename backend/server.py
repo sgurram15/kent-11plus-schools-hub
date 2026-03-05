@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Query, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
@@ -8,9 +8,12 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone
+import httpx
+from bs4 import BeautifulSoup
+import re
 
 ROOT_DIR = Path(__file__).parent
 PAPERS_DIR = ROOT_DIR / "static" / "papers"
@@ -125,6 +128,124 @@ class SchoolResponse(BaseModel):
 
 class CompareRequest(BaseModel):
     school_ids: List[str]
+
+# Open Events Model
+class OpenEvent(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    school_slug: str  # Links to school
+    school_name: str
+    event_type: str  # "Open Evening", "Open Morning", "Year 5 Open Morning", "Sixth Form Options Evening"
+    event_date: str  # e.g., "24 September 2025"
+    event_time: str  # e.g., "4:30pm to 7:30pm"
+    headteacher_speaks: Optional[str] = None  # e.g., "5:30pm and 6:30pm"
+    booking_required: bool = False
+    booking_url: Optional[str] = None
+    notes: Optional[str] = None
+    source_url: Optional[str] = None  # URL where this data was found
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class OpenEventCreate(BaseModel):
+    school_slug: str
+    school_name: str
+    event_type: str
+    event_date: str
+    event_time: str
+    headteacher_speaks: Optional[str] = None
+    booking_required: bool = False
+    booking_url: Optional[str] = None
+    notes: Optional[str] = None
+    source_url: Optional[str] = None
+
+class OpenEventResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    school_slug: str
+    school_name: str
+    event_type: str
+    event_date: str
+    event_time: str
+    headteacher_speaks: Optional[str] = None
+    booking_required: bool = False
+    booking_url: Optional[str] = None
+    notes: Optional[str] = None
+    source_url: Optional[str] = None
+    last_updated: str
+    created_at: str
+
+# Cut-off Scores Model
+class CutOffScore(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    school_slug: str
+    school_name: str
+    entry_year: str  # e.g., "2026"
+    inner_area_score: Optional[int] = None  # e.g., 389
+    outer_area_score: Optional[int] = None  # e.g., 403
+    governors_score: Optional[int] = None  # For schools with governors' places
+    pupil_premium_score: Optional[int] = None
+    furthest_distance_inner: Optional[str] = None  # e.g., "5.474 miles"
+    furthest_distance_outer: Optional[str] = None
+    total_offers: Optional[int] = None
+    inner_area_places: Optional[int] = None
+    outer_area_places: Optional[int] = None
+    mean_score_inner: Optional[float] = None
+    mean_score_outer: Optional[float] = None
+    notes: Optional[str] = None
+    source_url: Optional[str] = None
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CutOffScoreCreate(BaseModel):
+    school_slug: str
+    school_name: str
+    entry_year: str
+    inner_area_score: Optional[int] = None
+    outer_area_score: Optional[int] = None
+    governors_score: Optional[int] = None
+    pupil_premium_score: Optional[int] = None
+    furthest_distance_inner: Optional[str] = None
+    furthest_distance_outer: Optional[str] = None
+    total_offers: Optional[int] = None
+    inner_area_places: Optional[int] = None
+    outer_area_places: Optional[int] = None
+    mean_score_inner: Optional[float] = None
+    mean_score_outer: Optional[float] = None
+    notes: Optional[str] = None
+    source_url: Optional[str] = None
+
+class CutOffScoreResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    school_slug: str
+    school_name: str
+    entry_year: str
+    inner_area_score: Optional[int] = None
+    outer_area_score: Optional[int] = None
+    governors_score: Optional[int] = None
+    pupil_premium_score: Optional[int] = None
+    furthest_distance_inner: Optional[str] = None
+    furthest_distance_outer: Optional[str] = None
+    total_offers: Optional[int] = None
+    inner_area_places: Optional[int] = None
+    outer_area_places: Optional[int] = None
+    mean_score_inner: Optional[float] = None
+    mean_score_outer: Optional[float] = None
+    notes: Optional[str] = None
+    source_url: Optional[str] = None
+    last_updated: str
+    created_at: str
+
+# URL Scrape Request Model
+class ScrapeRequest(BaseModel):
+    url: str
+    school_slug: str
+    school_name: str
 
 # Seed data for all 32 Kent Grammar Schools with authentic GCSE results from GOV.UK 2025
 KENT_GRAMMAR_SCHOOLS = [
@@ -1026,6 +1147,373 @@ async def list_papers():
         return {"papers": []}
     papers = [f.name for f in PAPERS_DIR.glob("*.pdf")]
     return {"papers": sorted(papers), "count": len(papers)}
+
+# ============================================
+# OPEN EVENTS API ENDPOINTS
+# ============================================
+
+@api_router.get("/open-events", response_model=List[OpenEventResponse])
+async def get_open_events(
+    school_slug: Optional[str] = Query(None, description="Filter by school slug"),
+    upcoming_only: bool = Query(False, description="Show only upcoming events")
+):
+    """Get all open events, optionally filtered by school"""
+    query = {}
+    if school_slug:
+        query["school_slug"] = school_slug
+    
+    events = await db.open_events.find(query, {"_id": 0}).sort("event_date", 1).to_list(200)
+    
+    # Filter upcoming events if requested
+    if upcoming_only:
+        today = datetime.now(timezone.utc).date()
+        filtered_events = []
+        for event in events:
+            try:
+                # Parse date like "24 September 2025"
+                event_date = datetime.strptime(event['event_date'], "%d %B %Y").date()
+                if event_date >= today:
+                    filtered_events.append(event)
+            except:
+                # If date parsing fails, include the event
+                filtered_events.append(event)
+        events = filtered_events
+    
+    # Convert datetime objects to strings
+    for event in events:
+        if isinstance(event.get('last_updated'), datetime):
+            event['last_updated'] = event['last_updated'].isoformat()
+        if isinstance(event.get('created_at'), datetime):
+            event['created_at'] = event['created_at'].isoformat()
+    
+    return events
+
+@api_router.post("/open-events", response_model=OpenEventResponse)
+async def create_open_event(event: OpenEventCreate):
+    """Create a new open event"""
+    new_event = OpenEvent(**event.model_dump())
+    doc = new_event.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['last_updated'] = doc['last_updated'].isoformat()
+    await db.open_events.insert_one(doc)
+    return doc
+
+@api_router.put("/open-events/{event_id}", response_model=OpenEventResponse)
+async def update_open_event(event_id: str, event: OpenEventCreate):
+    """Update an existing open event"""
+    update_data = event.model_dump()
+    update_data['last_updated'] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.open_events.update_one(
+        {"id": event_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    updated = await db.open_events.find_one({"id": event_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/open-events/{event_id}")
+async def delete_open_event(event_id: str):
+    """Delete an open event"""
+    result = await db.open_events.delete_one({"id": event_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event deleted successfully"}
+
+# ============================================
+# CUT-OFF SCORES API ENDPOINTS
+# ============================================
+
+@api_router.get("/cut-off-scores", response_model=List[CutOffScoreResponse])
+async def get_cut_off_scores(
+    school_slug: Optional[str] = Query(None, description="Filter by school slug"),
+    entry_year: Optional[str] = Query(None, description="Filter by entry year")
+):
+    """Get all cut-off scores, optionally filtered"""
+    query = {}
+    if school_slug:
+        query["school_slug"] = school_slug
+    if entry_year:
+        query["entry_year"] = entry_year
+    
+    scores = await db.cut_off_scores.find(query, {"_id": 0}).sort([("entry_year", -1), ("school_name", 1)]).to_list(200)
+    
+    # Convert datetime objects to strings
+    for score in scores:
+        if isinstance(score.get('last_updated'), datetime):
+            score['last_updated'] = score['last_updated'].isoformat()
+        if isinstance(score.get('created_at'), datetime):
+            score['created_at'] = score['created_at'].isoformat()
+    
+    return scores
+
+@api_router.post("/cut-off-scores", response_model=CutOffScoreResponse)
+async def create_cut_off_score(score: CutOffScoreCreate):
+    """Create a new cut-off score entry"""
+    new_score = CutOffScore(**score.model_dump())
+    doc = new_score.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['last_updated'] = doc['last_updated'].isoformat()
+    await db.cut_off_scores.insert_one(doc)
+    return doc
+
+@api_router.put("/cut-off-scores/{score_id}", response_model=CutOffScoreResponse)
+async def update_cut_off_score(score_id: str, score: CutOffScoreCreate):
+    """Update an existing cut-off score"""
+    update_data = score.model_dump()
+    update_data['last_updated'] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.cut_off_scores.update_one(
+        {"id": score_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Score record not found")
+    
+    updated = await db.cut_off_scores.find_one({"id": score_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/cut-off-scores/{score_id}")
+async def delete_cut_off_score(score_id: str):
+    """Delete a cut-off score entry"""
+    result = await db.cut_off_scores.delete_one({"id": score_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Score record not found")
+    return {"message": "Score record deleted successfully"}
+
+# ============================================
+# SCRAPING HELPER ENDPOINT
+# ============================================
+
+@api_router.post("/scrape-school-page")
+async def scrape_school_page(request: ScrapeRequest):
+    """
+    Scrape a school's admissions page to extract open events and cut-off data.
+    Returns raw extracted data for user validation before saving.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(request.url, follow_redirects=True)
+            response.raise_for_status()
+            
+        soup = BeautifulSoup(response.text, 'html.parser')
+        text_content = soup.get_text(separator=' ', strip=True)
+        
+        # Extract potential open events
+        open_events = []
+        event_keywords = ['open evening', 'open morning', 'open day', 'open event', 'sixth form']
+        
+        # Look for date patterns near event keywords
+        date_pattern = r'(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})'
+        time_pattern = r'(\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)(?:\s*(?:to|-)\s*\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM))?)'
+        
+        dates_found = re.findall(date_pattern, text_content, re.IGNORECASE)
+        times_found = re.findall(time_pattern, text_content, re.IGNORECASE)
+        
+        # Extract potential cut-off scores
+        cut_off_data = {}
+        score_patterns = [
+            r'cut-?off\s*(?:score)?[:\s]+(\d{3})',
+            r'score\s+of\s+(\d{3})',
+            r'minimum\s+score[:\s]+(\d{3})',
+            r'threshold[:\s]+(\d{3})',
+            r'scored?\s+(\d{3})\s+or\s+higher',
+        ]
+        
+        for pattern in score_patterns:
+            matches = re.findall(pattern, text_content, re.IGNORECASE)
+            if matches:
+                cut_off_data['potential_scores'] = list(set(matches))
+                break
+        
+        # Look for distance information
+        distance_pattern = r'(\d+\.?\d*)\s*miles?'
+        distances = re.findall(distance_pattern, text_content, re.IGNORECASE)
+        if distances:
+            cut_off_data['potential_distances'] = distances
+        
+        # Look for number of places/offers
+        places_pattern = r'(\d+)\s*(?:places?|offers?)'
+        places = re.findall(places_pattern, text_content, re.IGNORECASE)
+        if places:
+            cut_off_data['potential_places'] = places
+        
+        return {
+            "success": True,
+            "url": request.url,
+            "school_slug": request.school_slug,
+            "school_name": request.school_name,
+            "extracted_data": {
+                "dates_found": dates_found[:10],  # Limit to first 10
+                "times_found": times_found[:10],
+                "cut_off_data": cut_off_data,
+                "text_preview": text_content[:2000]  # First 2000 chars for manual review
+            },
+            "message": "Data extracted successfully. Please review and validate before saving."
+        }
+        
+    except httpx.HTTPError as e:
+        return {
+            "success": False,
+            "url": request.url,
+            "error": f"HTTP error: {str(e)}",
+            "message": "Failed to fetch the page. Please check the URL and try again."
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "url": request.url,
+            "error": str(e),
+            "message": "An error occurred while scraping. Please try again."
+        }
+
+# ============================================
+# SEED INITIAL DATA ENDPOINT
+# ============================================
+
+@api_router.post("/seed-open-events")
+async def seed_open_events():
+    """Seed the database with initial open events data from scraped schools"""
+    
+    # Initial open events data from the scraped pages
+    initial_events = [
+        # TWGGS Events
+        {
+            "school_slug": "tunbridge-wells-girls-grammar-school",
+            "school_name": "Tunbridge Wells Girls' Grammar School",
+            "event_type": "Year 5 Open Morning",
+            "event_date": "2 July 2025",
+            "event_time": "10:40am to 12:30pm",
+            "headteacher_speaks": "12 noon",
+            "booking_required": False,
+            "notes": "No need to book - just turn up",
+            "source_url": "https://www.twggs.kent.sch.uk/548/open-events"
+        },
+        {
+            "school_slug": "tunbridge-wells-girls-grammar-school",
+            "school_name": "Tunbridge Wells Girls' Grammar School",
+            "event_type": "Open Evening",
+            "event_date": "24 September 2025",
+            "event_time": "4:30pm to 7:30pm",
+            "headteacher_speaks": "5:30pm and 6:30pm",
+            "booking_required": False,
+            "notes": "No need to book - just turn up",
+            "source_url": "https://www.twggs.kent.sch.uk/548/open-events"
+        },
+        {
+            "school_slug": "tunbridge-wells-girls-grammar-school",
+            "school_name": "Tunbridge Wells Girls' Grammar School",
+            "event_type": "Open Morning",
+            "event_date": "6 October 2025",
+            "event_time": "10:40am to 12:30pm",
+            "headteacher_speaks": "12 noon",
+            "booking_required": False,
+            "source_url": "https://www.twggs.kent.sch.uk/548/open-events"
+        },
+        {
+            "school_slug": "tunbridge-wells-girls-grammar-school",
+            "school_name": "Tunbridge Wells Girls' Grammar School",
+            "event_type": "Sixth Form Options Evening",
+            "event_date": "8 October 2025",
+            "event_time": "4:30pm onwards",
+            "headteacher_speaks": "5:30pm and 6:30pm",
+            "notes": "External candidates from 4:30pm, Current pupils from 5:30pm",
+            "source_url": "https://www.twggs.kent.sch.uk/548/open-events"
+        },
+        {
+            "school_slug": "tunbridge-wells-girls-grammar-school",
+            "school_name": "Tunbridge Wells Girls' Grammar School",
+            "event_type": "Open Morning",
+            "event_date": "29 October 2025",
+            "event_time": "10:40am to 12:00pm",
+            "headteacher_speaks": "12 noon",
+            "source_url": "https://www.twggs.kent.sch.uk/548/open-events"
+        },
+        # The Judd School Events (from their admissions page)
+        {
+            "school_slug": "judd-school",
+            "school_name": "The Judd School",
+            "event_type": "Open Evening",
+            "event_date": "September 2025",
+            "event_time": "TBC",
+            "notes": "Check school website for exact date",
+            "source_url": "https://www.judd.online/y7-joiners"
+        },
+        # The Skinners' School Events
+        {
+            "school_slug": "skinners-school",
+            "school_name": "The Skinners' School",
+            "event_type": "Open Events and Tours",
+            "event_date": "September 2025",
+            "event_time": "TBC",
+            "notes": "Check school website for exact dates",
+            "source_url": "https://www.skinners-school.co.uk/34/admission-events-and-tours"
+        },
+    ]
+    
+    # Clear existing events and insert new ones
+    await db.open_events.delete_many({})
+    
+    for event_data in initial_events:
+        event = OpenEvent(**event_data)
+        doc = event.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['last_updated'] = doc['last_updated'].isoformat()
+        await db.open_events.insert_one(doc)
+    
+    return {"message": f"Seeded {len(initial_events)} open events successfully"}
+
+@api_router.post("/seed-cut-off-scores")
+async def seed_cut_off_scores():
+    """Seed the database with initial cut-off score data"""
+    
+    # Initial cut-off scores from scraped data
+    initial_scores = [
+        {
+            "school_slug": "skinners-school",
+            "school_name": "The Skinners' School",
+            "entry_year": "2026",
+            "inner_area_score": 372,
+            "governors_score": 384,
+            "furthest_distance_inner": "5.474 miles",
+            "furthest_distance_outer": "13.921 miles",
+            "total_offers": 160,
+            "inner_area_places": 140,
+            "outer_area_places": 20,
+            "notes": "West Kent Area: 124 places + 16 Governors' places. Outer Area: 20 places. Score of 372+ required, ranked by distance.",
+            "source_url": "https://www.skinners-school.co.uk/38/2026-year-7-admission-information-updated-2nd-march"
+        },
+        {
+            "school_slug": "judd-school",
+            "school_name": "The Judd School",
+            "entry_year": "2026",
+            "inner_area_score": 389,
+            "outer_area_score": 403,
+            "total_offers": 180,
+            "inner_area_places": 157,
+            "outer_area_places": 23,
+            "mean_score_inner": 396.5,
+            "mean_score_outer": 409.2,
+            "notes": "Inner area cut-off increased from 371 (2025) to 389 (2026). Outer area from 398 to 403.",
+            "source_url": "https://www.judd.online/y7-joiners"
+        },
+    ]
+    
+    # Clear existing scores and insert new ones
+    await db.cut_off_scores.delete_many({})
+    
+    for score_data in initial_scores:
+        score = CutOffScore(**score_data)
+        doc = score.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['last_updated'] = doc['last_updated'].isoformat()
+        await db.cut_off_scores.insert_one(doc)
+    
+    return {"message": f"Seeded {len(initial_scores)} cut-off scores successfully"}
 
 # Include the router in the main app
 app.include_router(api_router)

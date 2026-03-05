@@ -21,7 +21,7 @@ const Navigation = () => {
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-home">
               Home
             </Link>
@@ -31,17 +31,17 @@ const Navigation = () => {
             <Link to="/compare" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-compare">
               Compare
             </Link>
-            <Link to="/exam-info" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-exam-info">
-              Exam Info
+            <Link to="/open-events" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-open-events">
+              Open Events
+            </Link>
+            <Link to="/cut-off-scores" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-cut-off-scores">
+              Cut-off Scores
             </Link>
             <Link to="/key-dates" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-key-dates">
               Key Dates
             </Link>
             <Link to="/practice-papers" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-practice-papers">
               Practice Papers
-            </Link>
-            <Link to="/independent-schools" className="text-stone-600 hover:text-primary transition-colors font-medium" data-testid="nav-independent-schools">
-              Independent Schools
             </Link>
           </div>
           
@@ -68,8 +68,11 @@ const Navigation = () => {
               <Link to="/compare" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Compare
               </Link>
-              <Link to="/exam-info" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
-                Exam Info
+              <Link to="/open-events" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Open Events
+              </Link>
+              <Link to="/cut-off-scores" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Cut-off Scores
               </Link>
               <Link to="/key-dates" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Key Dates
@@ -79,6 +82,9 @@ const Navigation = () => {
               </Link>
               <Link to="/independent-schools" className="text-stone-600 hover:text-primary transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Independent Schools
+              </Link>
+              <Link to="/admin" className="text-stone-400 hover:text-primary transition-colors font-medium text-sm" onClick={() => setIsMenuOpen(false)}>
+                Admin
               </Link>
             </div>
           </div>
@@ -108,10 +114,10 @@ const Footer = () => (
           <ul className="space-y-2">
             <li><Link to="/schools" className="hover:text-white transition-colors">All Schools</Link></li>
             <li><Link to="/compare" className="hover:text-white transition-colors">Compare Schools</Link></li>
-            <li><Link to="/exam-info" className="hover:text-white transition-colors">Exam Information</Link></li>
+            <li><Link to="/open-events" className="hover:text-white transition-colors">Open Events</Link></li>
+            <li><Link to="/cut-off-scores" className="hover:text-white transition-colors">Cut-off Scores</Link></li>
             <li><Link to="/key-dates" className="hover:text-white transition-colors">Key Dates & Calendar</Link></li>
             <li><Link to="/practice-papers" className="hover:text-white transition-colors">Practice Papers</Link></li>
-            <li><Link to="/independent-schools" className="hover:text-white transition-colors">Independent Schools</Link></li>
           </ul>
         </div>
         
@@ -120,6 +126,8 @@ const Footer = () => (
           <ul className="space-y-2">
             <li><a href="https://www.kent.gov.uk/education-and-children/schools/school-places" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Kent County Council</a></li>
             <li><a href="https://www.gl-assessment.co.uk" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GL Assessment</a></li>
+            <li><Link to="/exam-info" className="hover:text-white transition-colors">Exam Information</Link></li>
+            <li><Link to="/independent-schools" className="hover:text-white transition-colors">Independent Schools</Link></li>
           </ul>
         </div>
       </div>
@@ -2210,6 +2218,949 @@ const KeyDatesPage = () => {
   );
 };
 
+// Open Events Page
+const OpenEventsPage = () => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [schools, setSchools] = useState([]);
+  const [selectedSchool, setSelectedSchool] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [eventsRes, schoolsRes] = await Promise.all([
+          axios.get(`${API}/open-events`),
+          axios.get(`${API}/schools`)
+        ]);
+        setEvents(eventsRes.data);
+        setSchools(schoolsRes.data);
+      } catch (e) {
+        console.error("Error fetching data:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filteredEvents = selectedSchool 
+    ? events.filter(e => e.school_slug === selectedSchool)
+    : events;
+
+  // Group events by month
+  const groupedEvents = filteredEvents.reduce((acc, event) => {
+    const month = event.event_date.split(' ').slice(1).join(' '); // "September 2025"
+    if (!acc[month]) acc[month] = [];
+    acc[month].push(event);
+    return acc;
+  }, {});
+
+  const getEventTypeColor = (type) => {
+    if (type.includes('Evening')) return 'bg-purple-100 text-purple-700 border-purple-200';
+    if (type.includes('Morning')) return 'bg-blue-100 text-blue-700 border-blue-200';
+    if (type.includes('Sixth Form')) return 'bg-amber-100 text-amber-700 border-amber-200';
+    return 'bg-green-100 text-green-700 border-green-200';
+  };
+
+  return (
+    <div className="min-h-screen py-8" data-testid="open-events-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            School Open Events
+          </h1>
+          <p className="text-stone-600">Visit schools to learn more about their facilities and meet staff</p>
+        </div>
+
+        {/* Filter */}
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <label className="text-stone-600 font-medium">Filter by school:</label>
+            <select
+              value={selectedSchool}
+              onChange={(e) => setSelectedSchool(e.target.value)}
+              className="flex-1 md:flex-none md:w-80 px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+              data-testid="school-filter"
+            >
+              <option value="">All Schools</option>
+              {schools.map(school => (
+                <option key={school.id} value={school.slug}>{school.name}</option>
+              ))}
+            </select>
+            {selectedSchool && (
+              <button
+                onClick={() => setSelectedSchool('')}
+                className="text-stone-500 hover:text-stone-700 flex items-center gap-1"
+              >
+                <X className="h-4 w-4" /> Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Events Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-stone-200 h-48 animate-pulse" />
+            ))}
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="bg-stone-50 rounded-xl border border-dashed border-stone-300 p-12 text-center">
+            <Calendar className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+            <p className="text-stone-500">No open events found for the selected filter</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(groupedEvents).map(([month, monthEvents]) => (
+              <div key={month}>
+                <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  {month}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {monthEvents.map((event) => (
+                    <div key={event.id} className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded border ${getEventTypeColor(event.event_type)}`}>
+                          {event.event_type}
+                        </span>
+                        {!event.booking_required && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">No booking required</span>
+                        )}
+                      </div>
+                      
+                      <Link to={`/schools/${event.school_slug}`} className="font-heading text-lg font-semibold text-stone-900 hover:text-primary transition-colors">
+                        {event.school_name}
+                      </Link>
+                      
+                      <div className="mt-3 space-y-2 text-sm text-stone-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-stone-400" />
+                          <span className="font-medium">{event.event_date}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-stone-400" />
+                          <span>{event.event_time}</span>
+                        </div>
+                        {event.headteacher_speaks && (
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-stone-400" />
+                            <span>Headteacher speaks: {event.headteacher_speaks}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {event.notes && (
+                        <p className="mt-3 text-sm text-stone-500 bg-stone-50 p-2 rounded">{event.notes}</p>
+                      )}
+                      
+                      {event.source_url && (
+                        <a 
+                          href={event.source_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          <ExternalLink className="h-3 w-3" /> View on school website
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Info Box */}
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-stone-900 mb-1">Keep Events Updated</h3>
+              <p className="text-stone-600 text-sm">
+                Open event dates can change. We recommend checking the school's official website for the most current information.
+                This data was last updated from school websites and may not reflect recent changes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Cut-off Scores Page
+const CutOffScoresPage = () => {
+  const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState('2026');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${API}/cut-off-scores`);
+        setScores(response.data);
+      } catch (e) {
+        console.error("Error fetching data:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filteredScores = selectedYear 
+    ? scores.filter(s => s.entry_year === selectedYear)
+    : scores;
+
+  const years = [...new Set(scores.map(s => s.entry_year))].sort().reverse();
+
+  return (
+    <div className="min-h-screen py-8" data-testid="cut-off-scores-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            Cut-off Scores by School
+          </h1>
+          <p className="text-stone-600">Historical and current admission cut-off scores for Kent grammar schools</p>
+        </div>
+
+        {/* Year Filter */}
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 mb-8">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-stone-600 font-medium mr-2">Entry Year:</span>
+            {years.map(year => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                className={`px-4 py-2 rounded-md font-medium transition-all ${
+                  selectedYear === year 
+                    ? 'bg-primary text-white' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Explanation Box */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-stone-900 mb-1">Understanding Cut-off Scores</h3>
+              <p className="text-stone-600 text-sm">
+                Cut-off scores vary each year based on the number of applicants and their scores. 
+                The <strong>inner area</strong> is typically closer to the school, while the <strong>outer area</strong> covers a wider catchment.
+                Some schools also have <strong>governors' places</strong> awarded by highest score regardless of distance.
+                These scores are guides only - always check the school's official admissions policy.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Scores Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-stone-200 h-64 animate-pulse" />
+            ))}
+          </div>
+        ) : filteredScores.length === 0 ? (
+          <div className="bg-stone-50 rounded-xl border border-dashed border-stone-300 p-12 text-center">
+            <Trophy className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+            <p className="text-stone-500">No cut-off scores available for {selectedYear}</p>
+            <p className="text-stone-400 text-sm mt-2">Data is being collected from schools. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredScores.map((score) => (
+              <div key={score.id} className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-primary to-primary/90 p-4 text-white">
+                  <Link to={`/schools/${score.school_slug}`} className="font-heading text-lg font-semibold hover:underline">
+                    {score.school_name}
+                  </Link>
+                  <p className="text-sm text-white/80">Entry Year: {score.entry_year}</p>
+                </div>
+                
+                <div className="p-6">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    {score.inner_area_score && (
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-700">{score.inner_area_score}</p>
+                        <p className="text-xs text-stone-500">Inner Area Cut-off</p>
+                      </div>
+                    )}
+                    {score.outer_area_score && (
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-700">{score.outer_area_score}</p>
+                        <p className="text-xs text-stone-500">Outer Area Cut-off</p>
+                      </div>
+                    )}
+                    {score.governors_score && (
+                      <div className="text-center p-3 bg-amber-50 rounded-lg">
+                        <p className="text-2xl font-bold text-amber-700">{score.governors_score}</p>
+                        <p className="text-xs text-stone-500">Governors' Places</p>
+                      </div>
+                    )}
+                    {score.total_offers && (
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-700">{score.total_offers}</p>
+                        <p className="text-xs text-stone-500">Total Offers Made</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    {(score.inner_area_places || score.outer_area_places) && (
+                      <div className="flex justify-between text-stone-600">
+                        <span>Places:</span>
+                        <span>
+                          {score.inner_area_places && `Inner: ${score.inner_area_places}`}
+                          {score.inner_area_places && score.outer_area_places && ' | '}
+                          {score.outer_area_places && `Outer: ${score.outer_area_places}`}
+                        </span>
+                      </div>
+                    )}
+                    {(score.furthest_distance_inner || score.furthest_distance_outer) && (
+                      <div className="flex justify-between text-stone-600">
+                        <span>Furthest Distance:</span>
+                        <span>
+                          {score.furthest_distance_inner && `Inner: ${score.furthest_distance_inner}`}
+                          {score.furthest_distance_inner && score.furthest_distance_outer && ' | '}
+                          {score.furthest_distance_outer && `Outer: ${score.furthest_distance_outer}`}
+                        </span>
+                      </div>
+                    )}
+                    {(score.mean_score_inner || score.mean_score_outer) && (
+                      <div className="flex justify-between text-stone-600">
+                        <span>Mean Score:</span>
+                        <span>
+                          {score.mean_score_inner && `Inner: ${score.mean_score_inner}`}
+                          {score.mean_score_inner && score.mean_score_outer && ' | '}
+                          {score.mean_score_outer && `Outer: ${score.mean_score_outer}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {score.notes && (
+                    <p className="mt-4 text-sm text-stone-500 bg-stone-50 p-3 rounded">{score.notes}</p>
+                  )}
+                  
+                  {score.source_url && (
+                    <a 
+                      href={score.source_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" /> View source
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Call to Action */}
+        <div className="mt-8 bg-white rounded-xl border border-stone-200 shadow-sm p-6 text-center">
+          <h3 className="font-heading text-lg font-semibold text-stone-900 mb-2">Want more school data?</h3>
+          <p className="text-stone-600 text-sm mb-4">
+            We're actively collecting cut-off scores and admissions data from all Kent grammar schools.
+            Contact us if you have data to contribute or notice any inaccuracies.
+          </p>
+          <Link 
+            to="/schools"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all"
+          >
+            Browse All Schools <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Admin Page for Managing Data
+const AdminPage = () => {
+  const [schools, setSchools] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('events');
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [selectedSchool, setSelectedSchool] = useState('');
+  const [scrapeResult, setScrapeResult] = useState(null);
+  const [scraping, setScraping] = useState(false);
+  
+  // Form states for new event
+  const [newEvent, setNewEvent] = useState({
+    school_slug: '',
+    school_name: '',
+    event_type: 'Open Evening',
+    event_date: '',
+    event_time: '',
+    headteacher_speaks: '',
+    booking_required: false,
+    notes: '',
+    source_url: ''
+  });
+  
+  // Form states for new score
+  const [newScore, setNewScore] = useState({
+    school_slug: '',
+    school_name: '',
+    entry_year: '2026',
+    inner_area_score: '',
+    outer_area_score: '',
+    governors_score: '',
+    total_offers: '',
+    inner_area_places: '',
+    outer_area_places: '',
+    furthest_distance_inner: '',
+    furthest_distance_outer: '',
+    mean_score_inner: '',
+    mean_score_outer: '',
+    notes: '',
+    source_url: ''
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [schoolsRes, eventsRes, scoresRes] = await Promise.all([
+          axios.get(`${API}/schools`),
+          axios.get(`${API}/open-events`),
+          axios.get(`${API}/cut-off-scores`)
+        ]);
+        setSchools(schoolsRes.data);
+        setEvents(eventsRes.data);
+        setScores(scoresRes.data);
+      } catch (e) {
+        console.error("Error fetching data:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSchoolSelect = (slug) => {
+    const school = schools.find(s => s.slug === slug);
+    if (school) {
+      setSelectedSchool(slug);
+      setNewEvent(prev => ({ ...prev, school_slug: slug, school_name: school.name }));
+      setNewScore(prev => ({ ...prev, school_slug: slug, school_name: school.name }));
+    }
+  };
+
+  const handleScrape = async () => {
+    if (!scrapeUrl || !selectedSchool) return;
+    
+    setScraping(true);
+    setScrapeResult(null);
+    
+    try {
+      const school = schools.find(s => s.slug === selectedSchool);
+      const response = await axios.post(`${API}/scrape-school-page`, {
+        url: scrapeUrl,
+        school_slug: selectedSchool,
+        school_name: school?.name || ''
+      });
+      setScrapeResult(response.data);
+    } catch (e) {
+      setScrapeResult({ success: false, error: e.message });
+    } finally {
+      setScraping(false);
+    }
+  };
+
+  const handleAddEvent = async () => {
+    try {
+      await axios.post(`${API}/open-events`, newEvent);
+      const eventsRes = await axios.get(`${API}/open-events`);
+      setEvents(eventsRes.data);
+      setNewEvent({
+        school_slug: selectedSchool,
+        school_name: schools.find(s => s.slug === selectedSchool)?.name || '',
+        event_type: 'Open Evening',
+        event_date: '',
+        event_time: '',
+        headteacher_speaks: '',
+        booking_required: false,
+        notes: '',
+        source_url: scrapeUrl
+      });
+      alert('Event added successfully!');
+    } catch (e) {
+      alert('Error adding event: ' + e.message);
+    }
+  };
+
+  const handleAddScore = async () => {
+    try {
+      const scoreData = {
+        ...newScore,
+        inner_area_score: newScore.inner_area_score ? parseInt(newScore.inner_area_score) : null,
+        outer_area_score: newScore.outer_area_score ? parseInt(newScore.outer_area_score) : null,
+        governors_score: newScore.governors_score ? parseInt(newScore.governors_score) : null,
+        total_offers: newScore.total_offers ? parseInt(newScore.total_offers) : null,
+        inner_area_places: newScore.inner_area_places ? parseInt(newScore.inner_area_places) : null,
+        outer_area_places: newScore.outer_area_places ? parseInt(newScore.outer_area_places) : null,
+        mean_score_inner: newScore.mean_score_inner ? parseFloat(newScore.mean_score_inner) : null,
+        mean_score_outer: newScore.mean_score_outer ? parseFloat(newScore.mean_score_outer) : null,
+      };
+      await axios.post(`${API}/cut-off-scores`, scoreData);
+      const scoresRes = await axios.get(`${API}/cut-off-scores`);
+      setScores(scoresRes.data);
+      setNewScore({
+        school_slug: selectedSchool,
+        school_name: schools.find(s => s.slug === selectedSchool)?.name || '',
+        entry_year: '2026',
+        inner_area_score: '',
+        outer_area_score: '',
+        governors_score: '',
+        total_offers: '',
+        inner_area_places: '',
+        outer_area_places: '',
+        furthest_distance_inner: '',
+        furthest_distance_outer: '',
+        mean_score_inner: '',
+        mean_score_outer: '',
+        notes: '',
+        source_url: scrapeUrl
+      });
+      alert('Score added successfully!');
+    } catch (e) {
+      alert('Error adding score: ' + e.message);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await axios.delete(`${API}/open-events/${eventId}`);
+      setEvents(events.filter(e => e.id !== eventId));
+    } catch (e) {
+      alert('Error deleting event: ' + e.message);
+    }
+  };
+
+  const handleDeleteScore = async (scoreId) => {
+    if (!window.confirm('Are you sure you want to delete this score record?')) return;
+    try {
+      await axios.delete(`${API}/cut-off-scores/${scoreId}`);
+      setScores(scores.filter(s => s.id !== scoreId));
+    } catch (e) {
+      alert('Error deleting score: ' + e.message);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-stone-200 rounded w-1/4" />
+            <div className="h-64 bg-stone-200 rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-8" data-testid="admin-page">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
+            Admin: Manage School Data
+          </h1>
+          <p className="text-stone-600">Add and manage open events and cut-off scores for Kent grammar schools</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'events' ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+            }`}
+          >
+            Open Events ({events.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('scores')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'scores' ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+            }`}
+          >
+            Cut-off Scores ({scores.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('scrape')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'scrape' ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+            }`}
+          >
+            Scrape Helper
+          </button>
+        </div>
+
+        {/* School Selector */}
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 mb-6">
+          <label className="block text-sm font-medium text-stone-700 mb-2">Select School</label>
+          <select
+            value={selectedSchool}
+            onChange={(e) => handleSchoolSelect(e.target.value)}
+            className="w-full px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-stone-600"
+            data-testid="admin-school-selector"
+          >
+            <option value="">Select a school...</option>
+            {schools.map(school => (
+              <option key={school.id} value={school.slug}>{school.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Scrape Helper Tab */}
+        {activeTab === 'scrape' && (
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 mb-6">
+            <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Scrape School Page</h2>
+            <p className="text-stone-600 text-sm mb-4">
+              Enter a school's admissions page URL to extract dates and scores. Review the extracted data and add it manually.
+            </p>
+            
+            <div className="flex gap-2 mb-4">
+              <input
+                type="url"
+                placeholder="https://www.school-name.sch.uk/admissions..."
+                value={scrapeUrl}
+                onChange={(e) => setScrapeUrl(e.target.value)}
+                className="flex-1 px-4 py-3 border border-stone-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+              <button
+                onClick={handleScrape}
+                disabled={!scrapeUrl || !selectedSchool || scraping}
+                className="px-6 py-3 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {scraping ? 'Scraping...' : 'Scrape'}
+              </button>
+            </div>
+            
+            {scrapeResult && (
+              <div className={`p-4 rounded-lg ${scrapeResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                <h3 className="font-semibold mb-2">{scrapeResult.success ? 'Extracted Data' : 'Error'}</h3>
+                {scrapeResult.success ? (
+                  <div className="text-sm space-y-2">
+                    {scrapeResult.extracted_data?.dates_found?.length > 0 && (
+                      <div>
+                        <strong>Dates Found:</strong>
+                        <ul className="list-disc list-inside ml-2">
+                          {scrapeResult.extracted_data.dates_found.map((d, i) => <li key={i}>{d}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {scrapeResult.extracted_data?.times_found?.length > 0 && (
+                      <div>
+                        <strong>Times Found:</strong>
+                        <ul className="list-disc list-inside ml-2">
+                          {scrapeResult.extracted_data.times_found.map((t, i) => <li key={i}>{t}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {scrapeResult.extracted_data?.cut_off_data?.potential_scores && (
+                      <div>
+                        <strong>Potential Scores:</strong> {scrapeResult.extracted_data.cut_off_data.potential_scores.join(', ')}
+                      </div>
+                    )}
+                    {scrapeResult.extracted_data?.cut_off_data?.potential_distances && (
+                      <div>
+                        <strong>Distances:</strong> {scrapeResult.extracted_data.cut_off_data.potential_distances.join(', ')} miles
+                      </div>
+                    )}
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-primary">View text preview</summary>
+                      <pre className="mt-2 p-2 bg-stone-100 rounded text-xs overflow-auto max-h-48">
+                        {scrapeResult.extracted_data?.text_preview}
+                      </pre>
+                    </details>
+                  </div>
+                ) : (
+                  <p className="text-red-600">{scrapeResult.error}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === 'events' && (
+          <div className="space-y-6">
+            {/* Add Event Form */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Add New Event</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Event Type</label>
+                  <select
+                    value={newEvent.event_type}
+                    onChange={(e) => setNewEvent({ ...newEvent, event_type: e.target.value })}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  >
+                    <option>Open Evening</option>
+                    <option>Open Morning</option>
+                    <option>Year 5 Open Morning</option>
+                    <option>Sixth Form Options Evening</option>
+                    <option>School Tour</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Date (e.g., "24 September 2025")</label>
+                  <input
+                    type="text"
+                    value={newEvent.event_date}
+                    onChange={(e) => setNewEvent({ ...newEvent, event_date: e.target.value })}
+                    placeholder="24 September 2025"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Time</label>
+                  <input
+                    type="text"
+                    value={newEvent.event_time}
+                    onChange={(e) => setNewEvent({ ...newEvent, event_time: e.target.value })}
+                    placeholder="4:30pm to 7:30pm"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Headteacher Speaks</label>
+                  <input
+                    type="text"
+                    value={newEvent.headteacher_speaks}
+                    onChange={(e) => setNewEvent({ ...newEvent, headteacher_speaks: e.target.value })}
+                    placeholder="5:30pm and 6:30pm"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                  <input
+                    type="text"
+                    value={newEvent.notes}
+                    onChange={(e) => setNewEvent({ ...newEvent, notes: e.target.value })}
+                    placeholder="Additional notes..."
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={newEvent.booking_required}
+                    onChange={(e) => setNewEvent({ ...newEvent, booking_required: e.target.checked })}
+                    className="rounded"
+                  />
+                  <label className="text-sm text-stone-700">Booking Required</label>
+                </div>
+              </div>
+              
+              <button
+                onClick={handleAddEvent}
+                disabled={!selectedSchool || !newEvent.event_date}
+                className="mt-4 px-6 py-2 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
+              >
+                Add Event
+              </button>
+            </div>
+
+            {/* Events List */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Existing Events</h2>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {events.map(event => (
+                  <div key={event.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-stone-900">{event.school_name}</p>
+                      <p className="text-sm text-stone-600">{event.event_type} - {event.event_date} @ {event.event_time}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Scores Tab */}
+        {activeTab === 'scores' && (
+          <div className="space-y-6">
+            {/* Add Score Form */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Add New Cut-off Score</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Entry Year</label>
+                  <select
+                    value={newScore.entry_year}
+                    onChange={(e) => setNewScore({ ...newScore, entry_year: e.target.value })}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  >
+                    <option>2026</option>
+                    <option>2025</option>
+                    <option>2024</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Inner Area Score</label>
+                  <input
+                    type="number"
+                    value={newScore.inner_area_score}
+                    onChange={(e) => setNewScore({ ...newScore, inner_area_score: e.target.value })}
+                    placeholder="389"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Outer Area Score</label>
+                  <input
+                    type="number"
+                    value={newScore.outer_area_score}
+                    onChange={(e) => setNewScore({ ...newScore, outer_area_score: e.target.value })}
+                    placeholder="403"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Governors' Score</label>
+                  <input
+                    type="number"
+                    value={newScore.governors_score}
+                    onChange={(e) => setNewScore({ ...newScore, governors_score: e.target.value })}
+                    placeholder="384"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Total Offers</label>
+                  <input
+                    type="number"
+                    value={newScore.total_offers}
+                    onChange={(e) => setNewScore({ ...newScore, total_offers: e.target.value })}
+                    placeholder="180"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Inner Area Places</label>
+                  <input
+                    type="number"
+                    value={newScore.inner_area_places}
+                    onChange={(e) => setNewScore({ ...newScore, inner_area_places: e.target.value })}
+                    placeholder="157"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Outer Area Places</label>
+                  <input
+                    type="number"
+                    value={newScore.outer_area_places}
+                    onChange={(e) => setNewScore({ ...newScore, outer_area_places: e.target.value })}
+                    placeholder="23"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Furthest Distance (Inner)</label>
+                  <input
+                    type="text"
+                    value={newScore.furthest_distance_inner}
+                    onChange={(e) => setNewScore({ ...newScore, furthest_distance_inner: e.target.value })}
+                    placeholder="5.474 miles"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Furthest Distance (Outer)</label>
+                  <input
+                    type="text"
+                    value={newScore.furthest_distance_outer}
+                    onChange={(e) => setNewScore({ ...newScore, furthest_distance_outer: e.target.value })}
+                    placeholder="13.921 miles"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                  <textarea
+                    value={newScore.notes}
+                    onChange={(e) => setNewScore({ ...newScore, notes: e.target.value })}
+                    placeholder="Additional context about scores..."
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                    rows="2"
+                  />
+                </div>
+              </div>
+              
+              <button
+                onClick={handleAddScore}
+                disabled={!selectedSchool}
+                className="mt-4 px-6 py-2 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
+              >
+                Add Score
+              </button>
+            </div>
+
+            {/* Scores List */}
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Existing Scores</h2>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {scores.map(score => (
+                  <div key={score.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-stone-900">{score.school_name} ({score.entry_year})</p>
+                      <p className="text-sm text-stone-600">
+                        Inner: {score.inner_area_score || 'N/A'} | 
+                        Outer: {score.outer_area_score || 'N/A'} | 
+                        Governors: {score.governors_score || 'N/A'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteScore(score.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Main App
 function App() {
   return (
@@ -2226,6 +3177,9 @@ function App() {
             <Route path="/key-dates" element={<KeyDatesPage />} />
             <Route path="/practice-papers" element={<PracticePapersPage />} />
             <Route path="/independent-schools" element={<IndependentSchoolsPage />} />
+            <Route path="/open-events" element={<OpenEventsPage />} />
+            <Route path="/cut-off-scores" element={<CutOffScoresPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
         <Footer />
