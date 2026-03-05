@@ -753,6 +753,42 @@ const SchoolDetailPage = () => {
           
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Academic Performance */}
+            {(school.ofsted || school.attainment_8) && (
+              <div className="bg-gradient-to-br from-primary to-primary/90 rounded-xl shadow-sm p-6 text-white">
+                <h3 className="font-heading text-lg font-semibold mb-4">Academic Performance</h3>
+                <div className="space-y-3">
+                  {school.ofsted && (
+                    <div className="flex justify-between items-center pb-2 border-b border-white/20">
+                      <span className="text-white/80">Ofsted Rating</span>
+                      <span className={`font-bold px-2 py-0.5 rounded text-sm ${school.ofsted === 'Outstanding' ? 'bg-green-500' : 'bg-amber-500'}`}>
+                        {school.ofsted}
+                      </span>
+                    </div>
+                  )}
+                  {school.attainment_8 && (
+                    <div className="flex justify-between items-center pb-2 border-b border-white/20">
+                      <span className="text-white/80">Attainment 8</span>
+                      <span className="font-semibold">{school.attainment_8.toFixed(1)}</span>
+                    </div>
+                  )}
+                  {school.grade_5_english_maths && (
+                    <div className="flex justify-between items-center pb-2 border-b border-white/20">
+                      <span className="text-white/80">Grade 5+ Eng & Maths</span>
+                      <span className="font-semibold">{school.grade_5_english_maths}%</span>
+                    </div>
+                  )}
+                  {school.ebacc_entry && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/80">EBacc Entry</span>
+                      <span className="font-semibold">{school.ebacc_entry}%</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-white/60 mt-3">Data from GOV.UK 2024/25</p>
+              </div>
+            )}
+            
             {/* Key Stats */}
             <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
               <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">Key Information</h3>
@@ -836,14 +872,27 @@ const ComparePage = () => {
   };
   
   const compareFields = [
-    { key: 'type', label: 'Type' },
-    { key: 'pupils', label: 'Total Pupils', format: (v) => v.toLocaleString() },
+    // Basic Info Section
+    { key: 'type', label: 'Type', section: 'Basic Information' },
+    { key: 'pupils', label: 'Total Pupils', format: (v) => v?.toLocaleString() || '-' },
     { key: 'places_year7', label: 'Year 7 Places' },
     { key: 'competition', label: 'Competition' },
-    { key: 'competition_ratio', label: 'Competition Ratio', format: (v) => `${v}:1` },
+    { key: 'competition_ratio', label: 'Competition Ratio', format: (v) => v ? `${v}:1` : '-' },
+    { key: 'founded', label: 'Founded' },
+    // Academic Performance Section
+    { key: 'ofsted', label: 'Ofsted Rating', section: 'Academic Performance', highlight: true },
+    { key: 'attainment_8', label: 'Attainment 8 Score', format: (v) => v ? v.toFixed(1) : '-', highlight: true },
+    { key: 'grade_5_english_maths', label: 'Grade 5+ English & Maths', format: (v) => v ? `${v}%` : '-', highlight: true },
+    { key: 'ebacc_entry', label: 'EBacc Entry Rate', format: (v) => v ? `${v}%` : '-' },
+    { key: 'post_16_destination', label: 'Post-16 Destination', format: (v) => v ? `${v}%` : '-' },
+    // Admissions Section
+    { key: 'admissions_criteria', label: 'Admissions Criteria', section: 'Admissions' },
+    { key: 'catchment_distance', label: 'Catchment Info' },
     { key: 'open_days', label: 'Open Days' },
-    { key: 'exam_format', label: 'Exam Format' },
-    { key: 'address', label: 'Address' },
+    // Programs Section
+    { key: 'specialist_status', label: 'Specialist Status', section: 'Programs' },
+    { key: 'sixth_form', label: 'Sixth Form' },
+    { key: 'address', label: 'Address', section: 'Location' },
   ];
   
   return (
@@ -898,11 +947,11 @@ const ComparePage = () => {
               <table className="w-full" data-testid="comparison-table">
                 <thead>
                   <tr className="bg-stone-50">
-                    <th className="text-left p-4 font-semibold text-stone-900 border-b border-stone-200 min-w-[140px]">
+                    <th className="text-left p-4 font-semibold text-stone-900 border-b border-stone-200 min-w-[180px]">
                       Attribute
                     </th>
                     {selectedSchools.map(school => (
-                      <th key={school.id} className="text-left p-4 font-semibold text-stone-900 border-b border-stone-200 min-w-[180px]">
+                      <th key={school.id} className="text-left p-4 font-semibold text-stone-900 border-b border-stone-200 min-w-[200px]">
                         <Link to={`/schools/${school.slug}`} className="hover:text-primary">
                           {school.name}
                         </Link>
@@ -911,18 +960,35 @@ const ComparePage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {compareFields.map(field => (
-                    <tr key={field.key} className="border-b border-stone-100 last:border-0">
-                      <td className="p-4 text-stone-500 font-medium">{field.label}</td>
-                      {selectedSchools.map(school => (
-                        <td key={school.id} className="p-4 text-stone-900">
-                          {field.format ? field.format(school[field.key]) : school[field.key]}
+                  {compareFields.map((field, index) => (
+                    <>
+                      {field.section && (
+                        <tr key={`section-${field.section}`} className="bg-primary/5">
+                          <td colSpan={selectedSchools.length + 1} className="p-3 font-semibold text-primary text-sm uppercase tracking-wide">
+                            {field.section}
+                          </td>
+                        </tr>
+                      )}
+                      <tr key={field.key} className={`border-b border-stone-100 last:border-0 ${field.highlight ? 'bg-amber-50/50' : ''}`}>
+                        <td className="p-4 text-stone-600 font-medium">
+                          {field.label}
+                          {field.highlight && <span className="ml-1 text-xs text-amber-600">★</span>}
                         </td>
-                      ))}
-                    </tr>
+                        {selectedSchools.map(school => (
+                          <td key={school.id} className={`p-4 ${field.highlight ? 'font-semibold text-stone-900' : 'text-stone-700'}`}>
+                            {field.format ? field.format(school[field.key]) : (school[field.key] || '-')}
+                          </td>
+                        ))}
+                      </tr>
+                    </>
                   ))}
                 </tbody>
               </table>
+            </div>
+            
+            {/* Legend */}
+            <div className="px-4 py-3 bg-stone-50 border-t border-stone-200 text-sm text-stone-500">
+              <span className="text-amber-600">★</span> Key academic performance metrics from GOV.UK school performance data 2024/25
             </div>
           </div>
         ) : (

@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 
 class KentSchoolsAPITester:
-    def __init__(self, base_url="https://kent-schools-hub.preview.emergentagent.com"):
+    def __init__(self, base_url="https://school-picker.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_base = f"{base_url}/api"
         self.tests_run = 0
