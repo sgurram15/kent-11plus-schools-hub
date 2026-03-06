@@ -389,8 +389,8 @@ const SchoolsPage = () => {
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     gender: searchParams.get('gender') || '',
-    sortBy: searchParams.get('sort_by') || 'name',
-    sortOrder: searchParams.get('sort_order') || 'asc'
+    sortBy: searchParams.get('sort_by') || 'competition_ratio',
+    sortOrder: searchParams.get('sort_order') || 'desc'
   });
   
   const [showFilters, setShowFilters] = useState(false);
@@ -439,7 +439,7 @@ const SchoolsPage = () => {
   };
   
   const clearFilters = () => {
-    setFilters({ search: '', gender: '', sortBy: 'name', sortOrder: 'asc' });
+    setFilters({ search: '', gender: '', sortBy: 'competition_ratio', sortOrder: 'desc' });
     setSearchParams(new URLSearchParams());
   };
   
