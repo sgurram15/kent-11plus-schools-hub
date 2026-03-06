@@ -2892,8 +2892,21 @@ const AdminPage = () => {
     mean_score_inner: '',
     mean_score_outer: '',
     notes: '',
-    source_url: ''
+    source_url: '',
+    // New detailed fields
+    eligibility_threshold: '',
+    catchment_info: '',
+    named_parishes: '',
+    waiting_list_info: '',
+    appeals_info: '',
+    campus_info: '',
+    pupil_premium_info: '',
+    key_dates: '',
+    contact_email: ''
   });
+  
+  // State for editing existing scores
+  const [editingScore, setEditingScore] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -2983,27 +2996,96 @@ const AdminPage = () => {
       await axios.post(`${API}/cut-off-scores`, scoreData);
       const scoresRes = await axios.get(`${API}/cut-off-scores`);
       setScores(scoresRes.data);
-      setNewScore({
-        school_slug: selectedSchool,
-        school_name: schools.find(s => s.slug === selectedSchool)?.name || '',
-        entry_year: '2026',
-        inner_area_score: '',
-        outer_area_score: '',
-        governors_score: '',
-        total_offers: '',
-        inner_area_places: '',
-        outer_area_places: '',
-        furthest_distance_inner: '',
-        furthest_distance_outer: '',
-        mean_score_inner: '',
-        mean_score_outer: '',
-        notes: '',
-        source_url: scrapeUrl
-      });
+      resetScoreForm();
       alert('Score added successfully!');
     } catch (e) {
       alert('Error adding score: ' + e.message);
     }
+  };
+
+  const handleEditScore = (score) => {
+    setEditingScore(score);
+    setNewScore({
+      school_slug: score.school_slug,
+      school_name: score.school_name,
+      entry_year: score.entry_year,
+      inner_area_score: score.inner_area_score || '',
+      outer_area_score: score.outer_area_score || '',
+      governors_score: score.governors_score || '',
+      total_offers: score.total_offers || '',
+      inner_area_places: score.inner_area_places || '',
+      outer_area_places: score.outer_area_places || '',
+      furthest_distance_inner: score.furthest_distance_inner || '',
+      furthest_distance_outer: score.furthest_distance_outer || '',
+      mean_score_inner: score.mean_score_inner || '',
+      mean_score_outer: score.mean_score_outer || '',
+      notes: score.notes || '',
+      source_url: score.source_url || '',
+      eligibility_threshold: score.eligibility_threshold || '',
+      catchment_info: score.catchment_info || '',
+      named_parishes: score.named_parishes || '',
+      waiting_list_info: score.waiting_list_info || '',
+      appeals_info: score.appeals_info || '',
+      campus_info: score.campus_info || '',
+      pupil_premium_info: score.pupil_premium_info || '',
+      key_dates: score.key_dates || '',
+      contact_email: score.contact_email || ''
+    });
+    setSelectedSchool(score.school_slug);
+  };
+
+  const handleUpdateScore = async () => {
+    if (!editingScore) return;
+    try {
+      const scoreData = {
+        ...newScore,
+        inner_area_score: newScore.inner_area_score ? parseInt(newScore.inner_area_score) : null,
+        outer_area_score: newScore.outer_area_score ? parseInt(newScore.outer_area_score) : null,
+        governors_score: newScore.governors_score ? parseInt(newScore.governors_score) : null,
+        total_offers: newScore.total_offers ? parseInt(newScore.total_offers) : null,
+        inner_area_places: newScore.inner_area_places ? parseInt(newScore.inner_area_places) : null,
+        outer_area_places: newScore.outer_area_places ? parseInt(newScore.outer_area_places) : null,
+        mean_score_inner: newScore.mean_score_inner ? parseFloat(newScore.mean_score_inner) : null,
+        mean_score_outer: newScore.mean_score_outer ? parseFloat(newScore.mean_score_outer) : null,
+      };
+      await axios.put(`${API}/cut-off-scores/${editingScore.id}`, scoreData);
+      const scoresRes = await axios.get(`${API}/cut-off-scores`);
+      setScores(scoresRes.data);
+      setEditingScore(null);
+      resetScoreForm();
+      alert('Score updated successfully!');
+    } catch (e) {
+      alert('Error updating score: ' + e.message);
+    }
+  };
+
+  const resetScoreForm = () => {
+    setNewScore({
+      school_slug: selectedSchool,
+      school_name: schools.find(s => s.slug === selectedSchool)?.name || '',
+      entry_year: '2026',
+      inner_area_score: '',
+      outer_area_score: '',
+      governors_score: '',
+      total_offers: '',
+      inner_area_places: '',
+      outer_area_places: '',
+      furthest_distance_inner: '',
+      furthest_distance_outer: '',
+      mean_score_inner: '',
+      mean_score_outer: '',
+      notes: '',
+      source_url: scrapeUrl,
+      eligibility_threshold: '',
+      catchment_info: '',
+      named_parishes: '',
+      waiting_list_info: '',
+      appeals_info: '',
+      campus_info: '',
+      pupil_premium_info: '',
+      key_dates: '',
+      contact_email: ''
+    });
   };
 
   const handleDeleteEvent = async (eventId) => {
@@ -3274,11 +3356,14 @@ const AdminPage = () => {
         {/* Scores Tab */}
         {activeTab === 'scores' && (
           <div className="space-y-6">
-            {/* Add Score Form */}
+            {/* Add/Edit Score Form */}
             <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Add New Cut-off Score</h2>
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">
+                {editingScore ? `Edit: ${editingScore.school_name} (${editingScore.entry_year})` : 'Add New Cut-off Score'}
+              </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Basic Score Info */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1">Entry Year</label>
                   <select
@@ -3371,7 +3456,110 @@ const AdminPage = () => {
                     className="w-full px-3 py-2 border border-stone-200 rounded-md"
                   />
                 </div>
-                <div className="md:col-span-3">
+              </div>
+              
+              {/* Detailed Information Section */}
+              <details className="mb-6 border border-stone-200 rounded-lg">
+                <summary className="px-4 py-3 bg-stone-50 cursor-pointer font-medium text-stone-700 rounded-t-lg">
+                  Detailed Information (Expandable Fields)
+                </summary>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Eligibility Threshold</label>
+                    <input
+                      type="text"
+                      value={newScore.eligibility_threshold}
+                      onChange={(e) => setNewScore({ ...newScore, eligibility_threshold: e.target.value })}
+                      placeholder="332+ total, no section below 108"
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Contact Email</label>
+                    <input
+                      type="email"
+                      value={newScore.contact_email}
+                      onChange={(e) => setNewScore({ ...newScore, contact_email: e.target.value })}
+                      placeholder="admissions@school.kent.sch.uk"
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Catchment Area Info</label>
+                    <textarea
+                      value={newScore.catchment_info}
+                      onChange={(e) => setNewScore({ ...newScore, catchment_info: e.target.value })}
+                      placeholder="No catchment area. Average furthest distance: 18.81 miles..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Named Parishes</label>
+                    <textarea
+                      value={newScore.named_parishes}
+                      onChange={(e) => setNewScore({ ...newScore, named_parishes: e.target.value })}
+                      placeholder="Tonbridge, Sevenoaks, Tunbridge Wells..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Campus Information</label>
+                    <textarea
+                      value={newScore.campus_info}
+                      onChange={(e) => setNewScore({ ...newScore, campus_info: e.target.value })}
+                      placeholder="210 places TW campus, 90 Sevenoaks..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Waiting List Info</label>
+                    <textarea
+                      value={newScore.waiting_list_info}
+                      onChange={(e) => setNewScore({ ...newScore, waiting_list_info: e.target.value })}
+                      placeholder="Maintained until end of January..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Appeals Info</label>
+                    <textarea
+                      value={newScore.appeals_info}
+                      onChange={(e) => setNewScore({ ...newScore, appeals_info: e.target.value })}
+                      placeholder="2024: 1 upheld. 2023: 7 upheld..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Pupil Premium Info</label>
+                    <textarea
+                      value={newScore.pupil_premium_info}
+                      onChange={(e) => setNewScore({ ...newScore, pupil_premium_info: e.target.value })}
+                      placeholder="SIF required. Free 11+ prep via Atom Learning..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Key Dates</label>
+                    <textarea
+                      value={newScore.key_dates}
+                      onChange={(e) => setNewScore({ ...newScore, key_dates: e.target.value })}
+                      placeholder="National Offer Day: 2 March. Acceptance: 16 March..."
+                      className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                </div>
+              </details>
+              
+              {/* Notes and Source */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
                   <textarea
                     value={newScore.notes}
@@ -3381,37 +3569,82 @@ const AdminPage = () => {
                     rows="2"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Source URL</label>
+                  <input
+                    type="url"
+                    value={newScore.source_url}
+                    onChange={(e) => setNewScore({ ...newScore, source_url: e.target.value })}
+                    placeholder="https://www.school.kent.sch.uk/admissions"
+                    className="w-full px-3 py-2 border border-stone-200 rounded-md"
+                  />
+                </div>
               </div>
               
-              <button
-                onClick={handleAddScore}
-                disabled={!selectedSchool}
-                className="mt-4 px-6 py-2 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
-              >
-                Add Score
-              </button>
+              <div className="flex gap-2">
+                {editingScore ? (
+                  <>
+                    <button
+                      onClick={handleUpdateScore}
+                      className="px-6 py-2 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all"
+                    >
+                      Update Score
+                    </button>
+                    <button
+                      onClick={() => { setEditingScore(null); resetScoreForm(); }}
+                      className="px-6 py-2 bg-stone-200 text-stone-700 rounded-md font-medium hover:bg-stone-300 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleAddScore}
+                    disabled={!selectedSchool}
+                    className="px-6 py-2 bg-primary text-white rounded-md font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
+                  >
+                    Add Score
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Scores List */}
             <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
-              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Existing Scores</h2>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Existing Scores ({scores.length})</h2>
+              <div className="space-y-3 max-h-[500px] overflow-y-auto">
                 {scores.map(score => (
-                  <div key={score.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
-                    <div>
+                  <div key={score.id} className="flex items-center justify-between p-4 bg-stone-50 rounded-lg hover:bg-stone-100 transition-colors">
+                    <div className="flex-1">
                       <p className="font-medium text-stone-900">{score.school_name} ({score.entry_year})</p>
                       <p className="text-sm text-stone-600">
-                        Inner: {score.inner_area_score || 'N/A'} | 
-                        Outer: {score.outer_area_score || 'N/A'} | 
-                        Governors: {score.governors_score || 'N/A'}
+                        Inner: {score.inner_area_score || 'Distance'} | 
+                        Outer: {score.outer_area_score || '-'} | 
+                        Gov: {score.governors_score || '-'} |
+                        Places: {score.total_offers || '-'}
                       </p>
+                      {score.source_url && (
+                        <a href={score.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
+                          View Source
+                        </a>
+                      )}
                     </div>
-                    <button
-                      onClick={() => handleDeleteScore(score.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditScore(score)}
+                        className="p-2 text-primary hover:bg-primary/10 rounded"
+                        title="Edit"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteScore(score.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded"
+                        title="Delete"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
