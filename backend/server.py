@@ -217,6 +217,16 @@ class CutOffScoreCreate(BaseModel):
     mean_score_outer: Optional[float] = None
     notes: Optional[str] = None
     source_url: Optional[str] = None
+    # New detailed fields
+    eligibility_threshold: Optional[str] = None
+    catchment_info: Optional[str] = None
+    named_parishes: Optional[str] = None
+    waiting_list_info: Optional[str] = None
+    appeals_info: Optional[str] = None
+    campus_info: Optional[str] = None
+    pupil_premium_info: Optional[str] = None
+    key_dates: Optional[str] = None
+    contact_email: Optional[str] = None
 
 class CutOffScoreResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -238,6 +248,16 @@ class CutOffScoreResponse(BaseModel):
     mean_score_outer: Optional[float] = None
     notes: Optional[str] = None
     source_url: Optional[str] = None
+    # New detailed fields
+    eligibility_threshold: Optional[str] = None  # e.g., "332+ total, no section below 108"
+    catchment_info: Optional[str] = None  # Catchment area details
+    named_parishes: Optional[str] = None  # List of priority parishes
+    waiting_list_info: Optional[str] = None  # Waiting list details
+    appeals_info: Optional[str] = None  # Appeals statistics
+    campus_info: Optional[str] = None  # For schools with multiple campuses
+    pupil_premium_info: Optional[str] = None  # Pupil premium details
+    key_dates: Optional[str] = None  # Important dates
+    contact_email: Optional[str] = None  # Admissions contact
     last_updated: str
     created_at: str
 

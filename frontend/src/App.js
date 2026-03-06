@@ -2645,6 +2645,7 @@ const CutOffScoresPage = () => {
                 </div>
                 
                 <div className="p-6">
+                  {/* Score Boxes */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     {score.inner_area_score && (
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
@@ -2667,16 +2668,17 @@ const CutOffScoresPage = () => {
                     {score.total_offers && (
                       <div className="text-center p-3 bg-green-50 rounded-lg">
                         <p className="text-2xl font-bold text-green-700">{score.total_offers}</p>
-                        <p className="text-xs text-stone-500">Total Offers Made</p>
+                        <p className="text-xs text-stone-500">Total Places</p>
                       </div>
                     )}
                   </div>
                   
-                  <div className="space-y-2 text-sm">
+                  {/* Basic Stats */}
+                  <div className="space-y-2 text-sm border-b border-stone-100 pb-4 mb-4">
                     {(score.inner_area_places || score.outer_area_places) && (
                       <div className="flex justify-between text-stone-600">
-                        <span>Places:</span>
-                        <span>
+                        <span>Places Breakdown:</span>
+                        <span className="font-medium">
                           {score.inner_area_places && `Inner: ${score.inner_area_places}`}
                           {score.inner_area_places && score.outer_area_places && ' | '}
                           {score.outer_area_places && `Outer: ${score.outer_area_places}`}
@@ -2686,39 +2688,144 @@ const CutOffScoresPage = () => {
                     {(score.furthest_distance_inner || score.furthest_distance_outer) && (
                       <div className="flex justify-between text-stone-600">
                         <span>Furthest Distance:</span>
-                        <span>
-                          {score.furthest_distance_inner && `Inner: ${score.furthest_distance_inner}`}
-                          {score.furthest_distance_inner && score.furthest_distance_outer && ' | '}
-                          {score.furthest_distance_outer && `Outer: ${score.furthest_distance_outer}`}
+                        <span className="font-medium">
+                          {score.furthest_distance_inner}
+                          {score.furthest_distance_inner && score.furthest_distance_outer && ' / '}
+                          {score.furthest_distance_outer}
                         </span>
                       </div>
                     )}
                     {(score.mean_score_inner || score.mean_score_outer) && (
                       <div className="flex justify-between text-stone-600">
                         <span>Mean Score:</span>
-                        <span>
+                        <span className="font-medium">
                           {score.mean_score_inner && `Inner: ${score.mean_score_inner}`}
                           {score.mean_score_inner && score.mean_score_outer && ' | '}
                           {score.mean_score_outer && `Outer: ${score.mean_score_outer}`}
                         </span>
                       </div>
                     )}
+                    {score.eligibility_threshold && (
+                      <div className="flex justify-between text-stone-600">
+                        <span>Eligibility:</span>
+                        <span className="font-medium text-right max-w-[60%]">{score.eligibility_threshold}</span>
+                      </div>
+                    )}
                   </div>
                   
+                  {/* Detailed Information Sections */}
+                  <div className="space-y-3">
+                    {score.catchment_info && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" /> Catchment Area
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.catchment_info}</p>
+                      </details>
+                    )}
+                    
+                    {score.named_parishes && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4" /> Priority Parishes
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.named_parishes}</p>
+                      </details>
+                    )}
+                    
+                    {score.campus_info && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4" /> Campus Information
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.campus_info}</p>
+                      </details>
+                    )}
+                    
+                    {score.waiting_list_info && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <List className="h-4 w-4" /> Waiting List
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.waiting_list_info}</p>
+                      </details>
+                    )}
+                    
+                    {score.appeals_info && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <Scale className="h-4 w-4" /> Appeals
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.appeals_info}</p>
+                      </details>
+                    )}
+                    
+                    {score.pupil_premium_info && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <Users className="h-4 w-4" /> Pupil Premium
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.pupil_premium_info}</p>
+                      </details>
+                    )}
+                    
+                    {score.key_dates && (
+                      <details className="group">
+                        <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-stone-700 hover:text-primary">
+                          <span className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" /> Key Dates
+                          </span>
+                          <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+                        </summary>
+                        <p className="mt-2 text-sm text-stone-600 pl-6">{score.key_dates}</p>
+                      </details>
+                    )}
+                  </div>
+                  
+                  {/* Notes */}
                   {score.notes && (
                     <p className="mt-4 text-sm text-stone-500 bg-stone-50 p-3 rounded">{score.notes}</p>
                   )}
                   
-                  {score.source_url && (
-                    <a 
-                      href={score.source_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      <ExternalLink className="h-3 w-3" /> View source
-                    </a>
-                  )}
+                  {/* Footer Links */}
+                  <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between">
+                    {score.source_url && (
+                      <a 
+                        href={score.source_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        <ExternalLink className="h-3 w-3" /> Official Admissions Page
+                      </a>
+                    )}
+                    {score.contact_email && (
+                      <a 
+                        href={`mailto:${score.contact_email}`}
+                        className="inline-flex items-center gap-1 text-xs text-stone-500 hover:text-primary"
+                      >
+                        <Mail className="h-3 w-3" /> {score.contact_email}
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
