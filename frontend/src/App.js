@@ -855,20 +855,25 @@ const SchoolDetailPage = () => {
 const ComparePage = () => {
   const [schools, setSchools] = useState([]);
   const [selectedSchools, setSelectedSchools] = useState([]);
+  const [cutOffScores, setCutOffScores] = useState([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const fetchSchools = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/schools`);
-        setSchools(response.data);
+        const [schoolsRes, scoresRes] = await Promise.all([
+          axios.get(`${API}/schools`),
+          axios.get(`${API}/cut-off-scores`)
+        ]);
+        setSchools(schoolsRes.data);
+        setCutOffScores(scoresRes.data);
       } catch (e) {
-        console.error("Error fetching schools:", e);
+        console.error("Error fetching data:", e);
       } finally {
         setLoading(false);
       }
     };
-    fetchSchools();
+    fetchData();
   }, []);
   
   const handleSelectSchool = (school) => {
@@ -877,6 +882,12 @@ const ComparePage = () => {
     } else if (selectedSchools.length < 4) {
       setSelectedSchools(prev => [...prev, school]);
     }
+  };
+  
+  // Get cut-off score for a school
+  const getCutOffScore = (schoolSlug, field) => {
+    const score = cutOffScores.find(s => s.school_slug === schoolSlug && s.entry_year === "2026");
+    return score ? score[field] : null;
   };
   
   const compareFields = [
@@ -893,6 +904,14 @@ const ComparePage = () => {
     { key: 'grade_5_english_maths', label: 'Grade 5+ English & Maths', format: (v) => v ? `${v}%` : '-', highlight: true },
     { key: 'ebacc_entry', label: 'EBacc Entry Rate', format: (v) => v ? `${v}%` : '-' },
     { key: 'post_16_destination', label: 'Post-16 Destination', format: (v) => v ? `${v}%` : '-' },
+    // Cut-off Scores Section (2026)
+    { key: 'cutoff_inner', label: 'Inner Area Cut-off (2026)', section: 'Cut-off Scores (2026 Entry)', highlight: true, isCutoff: true, cutoffField: 'inner_area_score' },
+    { key: 'cutoff_outer', label: 'Outer Area Cut-off (2026)', highlight: true, isCutoff: true, cutoffField: 'outer_area_score' },
+    { key: 'cutoff_governors', label: 'Governors\' Score (2026)', isCutoff: true, cutoffField: 'governors_score' },
+    { key: 'cutoff_total_offers', label: 'Total Offers Made', isCutoff: true, cutoffField: 'total_offers' },
+    { key: 'cutoff_inner_places', label: 'Inner Area Places', isCutoff: true, cutoffField: 'inner_area_places' },
+    { key: 'cutoff_outer_places', label: 'Outer Area Places', isCutoff: true, cutoffField: 'outer_area_places' },
+    { key: 'cutoff_distance', label: 'Furthest Distance (Inner)', isCutoff: true, cutoffField: 'furthest_distance_inner' },
     // Admissions Section
     { key: 'admissions_criteria', label: 'Admissions Criteria', section: 'Admissions' },
     { key: 'catchment_distance', label: 'Catchment Info' },
@@ -903,6 +922,19 @@ const ComparePage = () => {
     { key: 'address', label: 'Address', section: 'Location' },
   ];
   
+  // Get the value for a field (either from school or cut-off scores)
+  const getFieldValue = (school, field) => {
+    if (field.isCutoff) {
+      const value = getCutOffScore(school.slug, field.cutoffField);
+      if (value === null || value === undefined) return '-';
+      if (field.format) return field.format(value);
+      return value;
+    }
+    const value = school[field.key];
+    if (field.format) return field.format(value);
+    return value || '-';
+  };
+  
   return (
     <div className="min-h-screen py-8" data-testid="compare-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -910,7 +942,7 @@ const ComparePage = () => {
           <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
             Compare Schools
           </h1>
-          <p className="text-stone-600">Select 2-4 schools to compare side by side</p>
+          <p className="text-stone-600">Select 2-4 schools to compare side by side including 2026 cut-off scores</p>
         </div>
         
         {/* School Selector */}
@@ -946,6 +978,12 @@ const ComparePage = () => {
               <option key={school.id} value={school.id}>{school.name}</option>
             ))}
           </select>
+          
+          {cutOffScores.length > 0 && (
+            <p className="text-xs text-stone-500 mt-3">
+              <span className="text-green-600">●</span> Cut-off scores available for {cutOffScores.length} schools (2026 entry)
+            </p>
+          )}
         </div>
         
         {/* Comparison Table */}
@@ -963,6 +1001,11 @@ const ComparePage = () => {
                         <Link to={`/schools/${school.slug}`} className="hover:text-primary">
                           {school.name}
                         </Link>
+                        {getCutOffScore(school.slug, 'inner_area_score') && (
+                          <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            2026 data
+                          </span>
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -971,20 +1014,20 @@ const ComparePage = () => {
                   {compareFields.map((field, index) => (
                     <React.Fragment key={`field-${index}-${field.key}`}>
                       {field.section && (
-                        <tr className="bg-primary/5">
-                          <td colSpan={selectedSchools.length + 1} className="p-3 font-semibold text-primary text-sm uppercase tracking-wide">
+                        <tr className={field.isCutoff ? "bg-green-50" : "bg-primary/5"}>
+                          <td colSpan={selectedSchools.length + 1} className={`p-3 font-semibold text-sm uppercase tracking-wide ${field.isCutoff ? 'text-green-700' : 'text-primary'}`}>
                             {field.section}
                           </td>
                         </tr>
                       )}
-                      <tr className={`border-b border-stone-100 last:border-0 ${field.highlight ? 'bg-amber-50/50' : ''}`}>
+                      <tr className={`border-b border-stone-100 last:border-0 ${field.highlight ? (field.isCutoff ? 'bg-green-50/50' : 'bg-amber-50/50') : ''}`}>
                         <td className="p-4 text-stone-600 font-medium">
                           {field.label}
-                          {field.highlight && <span className="ml-1 text-xs text-amber-600">★</span>}
+                          {field.highlight && <span className={`ml-1 text-xs ${field.isCutoff ? 'text-green-600' : 'text-amber-600'}`}>★</span>}
                         </td>
                         {selectedSchools.map(school => (
                           <td key={school.id} className={`p-4 ${field.highlight ? 'font-semibold text-stone-900' : 'text-stone-700'}`}>
-                            {field.format ? field.format(school[field.key]) : (school[field.key] || '-')}
+                            {getFieldValue(school, field)}
                           </td>
                         ))}
                       </tr>
@@ -996,7 +1039,8 @@ const ComparePage = () => {
             
             {/* Legend */}
             <div className="px-4 py-3 bg-stone-50 border-t border-stone-200 text-sm text-stone-500">
-              <span className="text-amber-600">★</span> Key academic performance metrics from GOV.UK school performance data 2024/25
+              <span className="text-amber-600">★</span> Academic metrics from GOV.UK 2024/25 &nbsp;|&nbsp;
+              <span className="text-green-600">★</span> Cut-off scores from school websites (March 2026)
             </div>
           </div>
         ) : (
