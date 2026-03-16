@@ -416,6 +416,13 @@ def main():
     test_results.append(tester.test_get_open_events())
     test_results.append(tester.test_open_events_count())
     
+    # NEW SCRAPING AND CUT-OFF FEATURES TESTS
+    print("\n🔍 Testing NEW Scraping and Cut-off Features...")
+    test_results.append(tester.test_scrape_sources())
+    test_results.append(tester.test_cut_off_scores_2026())
+    test_results.append(tester.test_schools_compare_with_cutoffs())
+    test_results.append(tester.test_scrape_individual_school())
+    
     # Print final results
     print("\n" + "=" * 50)
     print(f"📊 Test Results: {tester.tests_passed}/{tester.tests_run} passed")
