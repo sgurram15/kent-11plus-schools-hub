@@ -1431,6 +1431,101 @@ const PracticePapersPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Recommended Books - Affiliate Section */}
+            <div className="bg-gradient-to-b from-amber-50 to-orange-50 rounded-xl border border-amber-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-2 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-amber-600" />
+                Recommended Books
+              </h3>
+              <p className="text-xs text-stone-500 mb-4">Best-selling 11+ preparation materials</p>
+              
+              <div className="space-y-3">
+                <a 
+                  href="https://amzn.to/4spcAtu" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded-lg border border-amber-100 hover:border-amber-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-amber-700" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-amber-700 transition-colors">Bond 11+ Complete Pack</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Maths, English, VR & NVR</p>
+                      <span className="inline-flex items-center text-xs text-amber-600 mt-1 font-medium">
+                        View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+
+                <a 
+                  href="https://amzn.to/4spcAtu" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded-lg border border-amber-100 hover:border-amber-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-blue-700" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-blue-700 transition-colors">Bond Verbal Reasoning</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11</p>
+                      <span className="inline-flex items-center text-xs text-blue-600 mt-1 font-medium">
+                        View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+
+                <a 
+                  href="https://amzn.to/4spcAtu" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded-lg border border-amber-100 hover:border-amber-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-purple-700" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-purple-700 transition-colors">Bond Non-Verbal Reasoning</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11</p>
+                      <span className="inline-flex items-center text-xs text-purple-600 mt-1 font-medium">
+                        View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+
+                <a 
+                  href="https://amzn.to/413XnlI" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded-lg border border-orange-100 hover:border-orange-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-orange-700" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-orange-700 transition-colors">CGP 11+ GL Practice Pack</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Complete Test Bundle</p>
+                      <span className="inline-flex items-center text-xs text-orange-600 mt-1 font-medium">
+                        View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <p className="text-xs text-stone-400 mt-4 text-center italic">
+                As an Amazon Associate, we earn from qualifying purchases
+              </p>
+            </div>
+
             {/* Kent Test Format */}
             <div className="bg-primary text-white rounded-xl p-6">
               <h3 className="font-heading text-xl font-semibold mb-4">Kent Test Format</h3>
