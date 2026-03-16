@@ -2957,14 +2957,16 @@ const AdminPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [schoolsRes, eventsRes, scoresRes] = await Promise.all([
+        const [schoolsRes, eventsRes, scoresRes, sourcesRes] = await Promise.all([
           axios.get(`${API}/schools`),
           axios.get(`${API}/open-events`),
-          axios.get(`${API}/cut-off-scores`)
+          axios.get(`${API}/cut-off-scores`),
+          axios.get(`${API}/scrape-sources`)
         ]);
         setSchools(schoolsRes.data);
         setEvents(eventsRes.data);
         setScores(scoresRes.data);
+        setScrapeSources(sourcesRes.data.sources || []);
       } catch (e) {
         console.error("Error fetching data:", e);
       } finally {
@@ -2973,6 +2975,34 @@ const AdminPage = () => {
     };
     fetchData();
   }, []);
+
+  const handleRefreshAllScores = async () => {
+    if (!window.confirm('This will re-seed all cut-off scores from the configured sources. Continue?')) return;
+    setRefreshingScores(true);
+    try {
+      await axios.post(`${API}/seed-cut-off-scores`);
+      const scoresRes = await axios.get(`${API}/cut-off-scores`);
+      setScores(scoresRes.data);
+      alert('Cut-off scores refreshed successfully!');
+    } catch (e) {
+      alert('Error refreshing scores: ' + e.message);
+    } finally {
+      setRefreshingScores(false);
+    }
+  };
+
+  const handleScrapeSchool = async (schoolSlug) => {
+    setScraping(true);
+    try {
+      const response = await axios.post(`${API}/scrape-cutoff/${schoolSlug}`);
+      setScrapeResult(response.data);
+      alert(`Scraped ${schoolSlug}: ${response.data.success ? 'Success' : 'Failed'}`);
+    } catch (e) {
+      alert('Error scraping: ' + e.message);
+    } finally {
+      setScraping(false);
+    }
+  };
 
   const handleSchoolSelect = (slug) => {
     const school = schools.find(s => s.slug === slug);
