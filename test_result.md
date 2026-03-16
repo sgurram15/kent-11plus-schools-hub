@@ -206,13 +206,14 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "1.1"
+  test_sequence: 2
   run_ui: false
 
 test_plan:
   current_focus:
     - "All backend API endpoints tested and verified"
+    - "NEW scraping and cut-off features fully tested and working"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
