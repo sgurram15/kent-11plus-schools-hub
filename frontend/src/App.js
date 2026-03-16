@@ -726,17 +726,17 @@ const SchoolDetailPage = () => {
               </div>
             )}
             
-            {/* Specialist Status & Sixth Form */}
+            {/* Key Strengths & Sixth Form */}
             <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 md:p-8">
-              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">Programs & Specialisms</h2>
+              <h2 className="font-heading text-2xl font-semibold text-stone-900 mb-4">Programs & Key Strengths</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {school.specialist_status && (
+                {school.key_strengths && (
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="flex items-center gap-2 mb-2">
                       <Trophy className="h-5 w-5 text-blue-600" />
-                      <h3 className="font-semibold text-stone-900">Specialist Status</h3>
+                      <h3 className="font-semibold text-stone-900">Key Strengths</h3>
                     </div>
-                    <p className="text-stone-600">{school.specialist_status}</p>
+                    <p className="text-stone-600">{school.key_strengths}</p>
                   </div>
                 )}
                 {school.sixth_form && (
