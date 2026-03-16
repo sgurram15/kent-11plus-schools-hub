@@ -3337,6 +3337,7 @@ const AdminPage = () => {
   const [events, setEvents] = useState([]);
   const [scores, setScores] = useState([]);
   const [scrapeSources, setScrapeSources] = useState([]);
+  const [contactQueries, setContactQueries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('events');
   const [scrapeUrl, setScrapeUrl] = useState('');
