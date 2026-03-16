@@ -611,7 +611,7 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition_ratio": 3.0,
         "website": "http://www.nks.kent.sch.uk",
         "description": "The Norton Knatchbull School is a selective boys' grammar school in Ashford with specialist status in Mathematics and Computing.",
-        "key_strengths": "",
+        "key_strengths": "Maths & Computing specialist, Robotics excellence",
         "sixth_form": "Co-educational",
         "highlights": ["Maths & Computing specialist", "Strong programming clubs", "Robotics competitions", "Award-winning STEM projects"],
         "founded": "1635",
