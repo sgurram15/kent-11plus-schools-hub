@@ -129,6 +129,35 @@ class SchoolResponse(BaseModel):
 class CompareRequest(BaseModel):
     school_ids: List[str]
 
+# Contact Query Model
+class ContactQuery(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: str
+    subject: str
+    message: str
+    status: str = "new"  # new, read, replied
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ContactQueryCreate(BaseModel):
+    name: str
+    email: str
+    subject: str
+    message: str
+
+class ContactQueryResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    name: str
+    email: str
+    subject: str
+    message: str
+    status: str
+    created_at: str
+
 # Open Events Model
 class OpenEvent(BaseModel):
     model_config = ConfigDict(extra="ignore")
