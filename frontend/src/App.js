@@ -918,7 +918,7 @@ const ComparePage = () => {
     { key: 'catchment_distance', label: 'Catchment Info' },
     { key: 'open_days', label: 'Open Days' },
     // Programs Section
-    { key: 'specialist_status', label: 'Specialist Status', section: 'Programs' },
+    { key: 'key_strengths', label: 'Key Strengths', section: 'Programs' },
     { key: 'sixth_form', label: 'Sixth Form' },
     { key: 'address', label: 'Address', section: 'Location' },
   ];
