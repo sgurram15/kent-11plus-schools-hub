@@ -1499,6 +1499,30 @@ const PracticePapersPage = () => {
               <p className="text-xs text-stone-500 mb-4">Best-selling 11+ preparation materials</p>
               
               <div className="space-y-3">
+                {/* MOST IMPORTANT - VR Book */}
+                <a 
+                  href="https://amzn.to/3PbCimJ" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-lg border-2 border-red-300 hover:border-red-400 hover:shadow-lg transition-all group relative"
+                >
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    #1 PRIORITY
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-red-900 text-sm group-hover:text-red-700 transition-colors">Bond VR 10-11+ ⭐</h4>
+                      <p className="text-xs text-red-600 mt-0.5 font-medium">Most students fail here!</p>
+                      <span className="inline-flex items-center text-xs text-red-700 mt-1 font-bold">
+                        Buy Now <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+
                 <a 
                   href="https://amzn.to/4bnUnp2" 
                   target="_blank" 
