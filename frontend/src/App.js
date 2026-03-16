@@ -4308,6 +4308,7 @@ function App() {
             <Route path="/independent-schools" element={<IndependentSchoolsPage />} />
             <Route path="/open-events" element={<OpenEventsPage />} />
             <Route path="/cut-off-scores" element={<CutOffScoresPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
