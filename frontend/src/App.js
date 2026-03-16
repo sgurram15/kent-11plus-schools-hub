@@ -1345,7 +1345,7 @@ const PracticePapersPage = () => {
         </div>
 
         {/* Important Note */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -1354,6 +1354,46 @@ const PracticePapersPage = () => {
                 All Kent grammar schools use GL Assessment papers. These free practice papers help you understand the format. 
                 We recommend using these alongside structured learning resources for best results.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* IMPORTANT: Verbal Reasoning Warning */}
+        <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-300 rounded-xl p-6 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+            ⚠️ MOST IMPORTANT
+          </div>
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+                <h3 className="font-bold text-lg text-red-900">Verbal Reasoning - Where Most Students Fail!</h3>
+              </div>
+              <p className="text-red-800 text-sm mb-3">
+                <strong>Most ignored but most important!</strong> Verbal Reasoning is the section where students lose the most marks. 
+                It requires consistent daily practice to master vocabulary, word relationships, and logical thinking patterns.
+              </p>
+              <ul className="text-sm text-red-700 space-y-1">
+                <li>✗ Most students underestimate VR difficulty</li>
+                <li>✗ Cannot be crammed last minute - needs months of practice</li>
+                <li>✓ Regular practice dramatically improves scores</li>
+              </ul>
+            </div>
+            <div className="flex-shrink-0">
+              <a 
+                href="https://amzn.to/3PbCimJ" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex flex-col items-center gap-2 px-6 py-4 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <span className="text-2xl">📕</span>
+                <span className="font-bold">Bond VR 10-11+</span>
+                <span className="text-xs opacity-90">Essential Practice Book</span>
+                <span className="flex items-center gap-1 text-xs bg-white/20 px-2 py-1 rounded">
+                  <ShoppingCart className="h-3 w-3" />
+                  Buy on Amazon
+                </span>
+              </a>
             </div>
           </div>
         </div>
