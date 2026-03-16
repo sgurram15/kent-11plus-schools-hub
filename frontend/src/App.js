@@ -3394,16 +3394,18 @@ const AdminPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [schoolsRes, eventsRes, scoresRes, sourcesRes] = await Promise.all([
+        const [schoolsRes, eventsRes, scoresRes, sourcesRes, contactRes] = await Promise.all([
           axios.get(`${API}/schools`),
           axios.get(`${API}/open-events`),
           axios.get(`${API}/cut-off-scores`),
-          axios.get(`${API}/scrape-sources`)
+          axios.get(`${API}/scrape-sources`),
+          axios.get(`${API}/contact`)
         ]);
         setSchools(schoolsRes.data);
         setEvents(eventsRes.data);
         setScores(scoresRes.data);
         setScrapeSources(sourcesRes.data.sources || []);
+        setContactQueries(contactRes.data);
       } catch (e) {
         console.error("Error fetching data:", e);
       } finally {
