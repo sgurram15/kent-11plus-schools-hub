@@ -536,7 +536,7 @@ KENT_GRAMMAR_SCHOOLS = [
         "competition_ratio": 3.0,
         "website": "http://www.opgs.org",
         "description": "Oakwood Park Grammar School is a selective boys' grammar school in Maidstone with a co-educational sixth form and science specialist status.",
-        "key_strengths": "",
+        "key_strengths": "Science College status, Strong Engineering links",
         "sixth_form": "Co-educational",
         "highlights": ["Science College status", "Modern science labs", "Strong engineering links", "Active careers program"],
         "founded": "1958",
