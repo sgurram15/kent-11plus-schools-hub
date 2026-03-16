@@ -3674,6 +3674,14 @@ const AdminPage = () => {
             Data Sources ({scrapeSources.length})
           </button>
           <button
+            onClick={() => setActiveTab('contact')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'contact' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+            }`}
+          >
+            Contact Queries ({contactQueries.length})
+          </button>
+          <button
             onClick={() => setActiveTab('scrape')}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               activeTab === 'scrape' ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -3682,6 +3690,97 @@ const AdminPage = () => {
             Scrape Helper
           </button>
         </div>
+
+        {/* Contact Queries Tab */}
+        {activeTab === 'contact' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-stone-900">Contact Queries</h2>
+                  <p className="text-stone-600 text-sm mt-1">Messages received from site visitors</p>
+                </div>
+                <span className="text-sm text-stone-500">
+                  {contactQueries.filter(q => q.status === 'new').length} new messages
+                </span>
+              </div>
+
+              {contactQueries.length === 0 ? (
+                <div className="text-center py-12 text-stone-500">
+                  <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No contact queries received yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {contactQueries.map(query => (
+                    <div 
+                      key={query.id} 
+                      className={`border rounded-lg p-4 ${
+                        query.status === 'new' ? 'border-blue-200 bg-blue-50/50' : 'border-stone-200'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-semibold text-stone-900">{query.subject}</h3>
+                          <p className="text-sm text-stone-600">
+                            From: <span className="font-medium">{query.name}</span> ({query.email})
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            query.status === 'new' ? 'bg-blue-100 text-blue-700' : 
+                            query.status === 'read' ? 'bg-stone-100 text-stone-600' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {query.status}
+                          </span>
+                          <span className="text-xs text-stone-400">
+                            {new Date(query.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-stone-700 text-sm whitespace-pre-wrap bg-white p-3 rounded border border-stone-100">
+                        {query.message}
+                      </p>
+                      <div className="flex gap-2 mt-3">
+                        <a 
+                          href={`mailto:${query.email}?subject=Re: ${query.subject}`}
+                          className="px-3 py-1.5 bg-primary text-white rounded text-sm font-medium hover:bg-primary/90 transition-all"
+                        >
+                          Reply via Email
+                        </a>
+                        {query.status === 'new' && (
+                          <button
+                            onClick={async () => {
+                              await axios.put(`${API}/contact/${query.id}/status`, { status: 'read' });
+                              setContactQueries(prev => prev.map(q => 
+                                q.id === query.id ? {...q, status: 'read'} : q
+                              ));
+                            }}
+                            className="px-3 py-1.5 bg-stone-100 text-stone-700 rounded text-sm font-medium hover:bg-stone-200 transition-all"
+                          >
+                            Mark as Read
+                          </button>
+                        )}
+                        <button
+                          onClick={async () => {
+                            if (window.confirm('Delete this query?')) {
+                              await axios.delete(`${API}/contact/${query.id}`);
+                              setContactQueries(prev => prev.filter(q => q.id !== query.id));
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-red-100 text-red-700 rounded text-sm font-medium hover:bg-red-200 transition-all"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Data Sources Tab */}
         {activeTab === 'sources' && (
