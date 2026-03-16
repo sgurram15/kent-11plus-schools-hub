@@ -275,9 +275,13 @@ def main():
     # Run all tests
     test_results = []
     
+    # Health check test
+    test_results.append(tester.test_health_check())
+    
     # Basic API tests
     test_results.append(tester.test_root_endpoint())
     test_results.append(tester.test_get_all_schools())
+    test_results.append(tester.test_schools_count())
     
     # Search and filter tests
     test_results.append(tester.test_school_search())
@@ -286,12 +290,21 @@ def main():
     
     # Individual school tests
     test_results.append(tester.test_get_specific_school())
+    test_results.append(tester.test_get_judd_school())
     test_results.append(tester.test_school_not_found())
     
     # Stats and comparison tests
     test_results.append(tester.test_stats_summary())
     test_results.append(tester.test_compare_schools())
     test_results.append(tester.test_compare_schools_validation())
+    
+    # Cut-off scores tests
+    test_results.append(tester.test_get_cut_off_scores())
+    test_results.append(tester.test_cut_off_scores_count())
+    
+    # Open events tests
+    test_results.append(tester.test_get_open_events())
+    test_results.append(tester.test_open_events_count())
     
     # Print final results
     print("\n" + "=" * 50)
