@@ -2900,12 +2900,14 @@ const AdminPage = () => {
   const [schools, setSchools] = useState([]);
   const [events, setEvents] = useState([]);
   const [scores, setScores] = useState([]);
+  const [scrapeSources, setScrapeSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('events');
   const [scrapeUrl, setScrapeUrl] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('');
   const [scrapeResult, setScrapeResult] = useState(null);
   const [scraping, setScraping] = useState(false);
+  const [refreshingScores, setRefreshingScores] = useState(false);
   
   // Form states for new event
   const [newEvent, setNewEvent] = useState({
