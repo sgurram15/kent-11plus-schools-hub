@@ -1,0 +1,10 @@
+{
+  "short_name": "Kent 11+",
+  "name": "Kent 11+ Grammar Schools Hub",
+  "description": "Your comprehensive guide to Kent grammar school admissions",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1e3a5f",
+  "background_color": "#ffffff"
+}
