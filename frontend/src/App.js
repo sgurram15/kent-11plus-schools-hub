@@ -3209,7 +3209,7 @@ const AdminPage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab('events')}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
@@ -3227,6 +3227,14 @@ const AdminPage = () => {
             Cut-off Scores ({scores.length})
           </button>
           <button
+            onClick={() => setActiveTab('sources')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'sources' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
+            Data Sources ({scrapeSources.length})
+          </button>
+          <button
             onClick={() => setActiveTab('scrape')}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               activeTab === 'scrape' ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -3235,6 +3243,121 @@ const AdminPage = () => {
             Scrape Helper
           </button>
         </div>
+
+        {/* Data Sources Tab */}
+        {activeTab === 'sources' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-stone-900">Configured Data Sources</h2>
+                  <p className="text-stone-600 text-sm mt-1">School websites configured for cut-off score scraping</p>
+                </div>
+                <button
+                  onClick={handleRefreshAllScores}
+                  disabled={refreshingScores}
+                  className="px-6 py-3 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {refreshingScores ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="h-4 w-4" />
+                      Refresh All Scores
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {scrapeSources.map((source, index) => (
+                  <div key={index} className="border border-stone-200 rounded-lg p-4 hover:border-green-300 transition-all">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-stone-900">{source.school_name}</h3>
+                        <p className="text-sm text-stone-600 mt-1">{source.description}</p>
+                        <a 
+                          href={source.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline flex items-center gap-1 mt-2"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          {source.url}
+                        </a>
+                        <span className={`inline-block mt-2 text-xs px-2 py-1 rounded ${
+                          source.type === 'pdf' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {source.type.toUpperCase()}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleScrapeSchool(source.school_slug)}
+                        disabled={scraping || source.type === 'pdf'}
+                        className="px-4 py-2 bg-stone-100 text-stone-700 rounded-md text-sm font-medium hover:bg-stone-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {source.type === 'pdf' ? 'Manual Entry' : 'Scrape Now'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Current Scores Summary */}
+              <div className="mt-8 pt-6 border-t border-stone-200">
+                <h3 className="font-semibold text-stone-900 mb-4">Current Cut-off Scores (2026 Entry)</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-stone-50">
+                        <th className="text-left p-3 font-semibold">School</th>
+                        <th className="text-center p-3 font-semibold">Inner Area</th>
+                        <th className="text-center p-3 font-semibold">Outer Area</th>
+                        <th className="text-center p-3 font-semibold">Governors</th>
+                        <th className="text-center p-3 font-semibold">Total Offers</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {scores.filter(s => s.entry_year === '2026').map(score => (
+                        <tr key={score.id} className="border-b border-stone-100">
+                          <td className="p-3 font-medium">{score.school_name}</td>
+                          <td className="p-3 text-center">
+                            {score.inner_area_score ? (
+                              <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-semibold">
+                                {score.inner_area_score}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td className="p-3 text-center">
+                            {score.outer_area_score ? (
+                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded font-semibold">
+                                {score.outer_area_score}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td className="p-3 text-center">
+                            {score.governors_score ? (
+                              <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded font-semibold">
+                                {score.governors_score}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td className="p-3 text-center">{score.total_offers || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* School Selector */}
         <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 mb-6">
