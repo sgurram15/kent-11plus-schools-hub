@@ -1357,6 +1357,41 @@ const PracticePapersPage = () => {
           </div>
         </div>
 
+        {/* Recommended Books Banner */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 mb-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <BookOpen className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-stone-900 mb-1">📚 Recommended 11+ Practice Books</h3>
+                <p className="text-stone-600 text-sm">
+                  Complement free papers with structured workbooks from top publishers
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <a 
+                href="https://amzn.to/4spcAtu" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Bond 11+ Books
+              </a>
+              <a 
+                href="https://amzn.to/413XnlI" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                CGP 11+ Books
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
