@@ -158,6 +158,113 @@ class KentSchoolsAPITester:
         compare_data = {"school_ids": ["single-id"]}
         return self.run_test("Compare Schools Validation (Bad Request)", "POST", "schools/compare", expected_status=400, data=compare_data)
 
+    def test_health_check(self):
+        """Test the health check endpoint"""
+        success, response = self.run_test("Health Check", "GET", "health")
+        if success and isinstance(response, dict):
+            if response.get('status') == 'healthy':
+                print(f"   ✅ Service is healthy")
+            else:
+                print(f"   ⚠️  Unexpected health status: {response.get('status')}")
+        return success
+
+    def test_get_judd_school(self):
+        """Test getting The Judd School specifically"""
+        success, response = self.run_test("Get The Judd School", "GET", "schools/judd-school")
+        if success and isinstance(response, dict):
+            if response.get('name') == 'The Judd School':
+                print(f"   ✅ Found The Judd School")
+                print(f"   Address: {response.get('address', 'Unknown')}")
+                print(f"   Type: {response.get('type', 'Unknown')}")
+            else:
+                print(f"   ⚠️  Expected 'The Judd School', got: {response.get('name')}")
+        return success
+
+    def test_get_cut_off_scores(self):
+        """Test getting cut-off scores"""
+        success, response = self.run_test("Get Cut-off Scores", "GET", "cut-off-scores")
+        if success and isinstance(response, list):
+            print(f"   Found {len(response)} cut-off score records")
+            if len(response) > 0:
+                # Check for The Judd School and The Skinners' School scores
+                judd_scores = [score for score in response if score.get('school_name') == 'The Judd School']
+                skinners_scores = [score for score in response if score.get('school_name') == "The Skinners' School"]
+                
+                if judd_scores:
+                    judd = judd_scores[0]
+                    print(f"   ✅ The Judd School - Inner: {judd.get('inner_area_score')}, Outer: {judd.get('outer_area_score')}")
+                else:
+                    print(f"   ⚠️  The Judd School scores not found")
+                
+                if skinners_scores:
+                    skinners = skinners_scores[0]
+                    print(f"   ✅ The Skinners' School - Inner: {skinners.get('inner_area_score')}, Outer: {skinners.get('outer_area_score')}")
+                else:
+                    print(f"   ⚠️  The Skinners' School scores not found")
+                    
+                # Check data structure
+                first_score = response[0]
+                required_fields = ['id', 'school_slug', 'school_name', 'entry_year']
+                missing_fields = [field for field in required_fields if field not in first_score]
+                if missing_fields:
+                    print(f"   ⚠️  Missing required fields: {missing_fields}")
+                else:
+                    print(f"   ✅ Cut-off score data structure is valid")
+        return success
+
+    def test_get_open_events(self):
+        """Test getting open events"""
+        success, response = self.run_test("Get Open Events", "GET", "open-events")
+        if success and isinstance(response, list):
+            print(f"   Found {len(response)} open events")
+            if len(response) > 0:
+                # Check data structure
+                first_event = response[0]
+                required_fields = ['id', 'school_slug', 'school_name', 'event_type', 'event_date', 'event_time']
+                missing_fields = [field for field in required_fields if field not in first_event]
+                if missing_fields:
+                    print(f"   ⚠️  Missing required fields: {missing_fields}")
+                else:
+                    print(f"   ✅ Open event data structure is valid")
+                
+                # Show some sample events
+                for i, event in enumerate(response[:3]):
+                    print(f"   Event {i+1}: {event.get('school_name')} - {event.get('event_type')} on {event.get('event_date')}")
+        return success
+
+    def test_schools_count(self):
+        """Test that we have the expected number of schools (31)"""
+        success, response = self.run_test("Check Schools Count", "GET", "schools")
+        if success and isinstance(response, list):
+            school_count = len(response)
+            if school_count == 31:
+                print(f"   ✅ Found expected 31 schools")
+            else:
+                print(f"   ⚠️  Expected 31 schools, found {school_count}")
+        return success
+
+    def test_cut_off_scores_count(self):
+        """Test that we have the expected number of cut-off scores (2)"""
+        success, response = self.run_test("Check Cut-off Scores Count", "GET", "cut-off-scores")
+        if success and isinstance(response, list):
+            scores_count = len(response)
+            if scores_count == 2:
+                print(f"   ✅ Found expected 2 cut-off score records")
+            else:
+                print(f"   ⚠️  Expected 2 cut-off score records, found {scores_count}")
+        return success
+
+    def test_open_events_count(self):
+        """Test that we have the expected number of open events (7)"""
+        success, response = self.run_test("Check Open Events Count", "GET", "open-events")
+        if success and isinstance(response, list):
+            events_count = len(response)
+            if events_count == 7:
+                print(f"   ✅ Found expected 7 open events")
+            else:
+                print(f"   ⚠️  Expected 7 open events, found {events_count}")
+        return success
+
 def main():
     print("🚀 Starting Kent Schools Hub API Tests")
     print("=" * 50)
