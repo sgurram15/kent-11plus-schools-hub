@@ -1441,7 +1441,7 @@ const PracticePapersPage = () => {
               
               <div className="space-y-3">
                 <a 
-                  href="https://amzn.to/4spcAtu" 
+                  href="https://amzn.to/4bnUnp2" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="block p-3 bg-white rounded-lg border border-amber-100 hover:border-amber-300 hover:shadow-md transition-all group"
@@ -1451,8 +1451,8 @@ const PracticePapersPage = () => {
                       <BookOpen className="h-5 w-5 text-amber-700" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-amber-700 transition-colors">Bond 11+ Complete Pack</h4>
-                      <p className="text-xs text-stone-500 mt-0.5">Maths, English, VR & NVR</p>
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-amber-700 transition-colors">Bond 11+ Maths</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11+</p>
                       <span className="inline-flex items-center text-xs text-amber-600 mt-1 font-medium">
                         View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
                       </span>
@@ -1461,18 +1461,58 @@ const PracticePapersPage = () => {
                 </a>
 
                 <a 
-                  href="https://amzn.to/4spcAtu" 
+                  href="https://amzn.to/3Nkx7Aq" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="block p-3 bg-white rounded-lg border border-amber-100 hover:border-amber-300 hover:shadow-md transition-all group"
+                  className="block p-3 bg-white rounded-lg border border-green-100 hover:border-green-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-green-700" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-green-700 transition-colors">Bond 11+ English</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11+</p>
+                      <span className="inline-flex items-center text-xs text-green-600 mt-1 font-medium">
+                        View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+
+                <a 
+                  href="https://amzn.to/3P8WJ3O" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-purple-700" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-purple-700 transition-colors">Bond 11+ Verbal Reasoning</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11+</p>
+                      <span className="inline-flex items-center text-xs text-purple-600 mt-1 font-medium">
+                        View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
+                      </span>
+                    </div>
+                  </div>
+                </a>
+
+                <a 
+                  href="https://amzn.to/4dkssZK" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-300 hover:shadow-md transition-all group"
                 >
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
                       <BookOpen className="h-5 w-5 text-blue-700" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-blue-700 transition-colors">Bond Verbal Reasoning</h4>
-                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11</p>
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-blue-700 transition-colors">Bond 11+ Non-Verbal Reasoning</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11+</p>
                       <span className="inline-flex items-center text-xs text-blue-600 mt-1 font-medium">
                         View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
                       </span>
@@ -1484,16 +1524,16 @@ const PracticePapersPage = () => {
                   href="https://amzn.to/4spcAtu" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="block p-3 bg-white rounded-lg border border-amber-100 hover:border-amber-300 hover:shadow-md transition-all group"
+                  className="block p-3 bg-white rounded-lg border border-red-100 hover:border-red-300 hover:shadow-md transition-all group"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                      <BookOpen className="h-5 w-5 text-purple-700" />
+                    <div className="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                      <BookOpen className="h-5 w-5 text-red-700" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-purple-700 transition-colors">Bond Non-Verbal Reasoning</h4>
-                      <p className="text-xs text-stone-500 mt-0.5">Assessment Papers 10-11</p>
-                      <span className="inline-flex items-center text-xs text-purple-600 mt-1 font-medium">
+                      <h4 className="font-semibold text-stone-900 text-sm group-hover:text-red-700 transition-colors">Bond 11+ Complete Pack</h4>
+                      <p className="text-xs text-stone-500 mt-0.5">All Subjects Bundle</p>
+                      <span className="inline-flex items-center text-xs text-red-600 mt-1 font-medium">
                         View on Amazon <ExternalLink className="h-3 w-3 ml-1" />
                       </span>
                     </div>
