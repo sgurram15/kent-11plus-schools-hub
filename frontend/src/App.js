@@ -128,6 +128,7 @@ const Footer = () => (
             <li><a href="https://www.gl-assessment.co.uk" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GL Assessment</a></li>
             <li><Link to="/exam-info" className="hover:text-white transition-colors">Exam Information</Link></li>
             <li><Link to="/independent-schools" className="hover:text-white transition-colors">Independent Schools</Link></li>
+            <li><Link to="/contact" className="hover:text-white transition-colors flex items-center gap-1"><Mail className="h-3 w-3" /> Contact Us</Link></li>
           </ul>
         </div>
       </div>
