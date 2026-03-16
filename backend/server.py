@@ -1121,6 +1121,29 @@ async def get_school(slug: str):
         raise HTTPException(status_code=404, detail="School not found")
     return school
 
+@api_router.put("/schools/{school_id}")
+async def update_school(school_id: str, updates: dict = Body(...)):
+    """Update a school's information"""
+    # Remove fields that shouldn't be updated
+    protected_fields = ['id', 'slug', 'created_at', '_id']
+    for field in protected_fields:
+        updates.pop(field, None)
+    
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    
+    result = await db.schools.update_one(
+        {"id": school_id},
+        {"$set": updates}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="School not found")
+    
+    # Return updated school
+    updated_school = await db.schools.find_one({"id": school_id}, {"_id": 0})
+    return updated_school
+
 @api_router.post("/schools/compare", response_model=List[SchoolResponse])
 async def compare_schools(request: CompareRequest):
     if len(request.school_ids) < 2 or len(request.school_ids) > 4:
