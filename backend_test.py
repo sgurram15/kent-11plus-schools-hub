@@ -265,6 +265,116 @@ class KentSchoolsAPITester:
                 print(f"   ⚠️  Expected 7 open events, found {events_count}")
         return success
 
+    def test_scrape_sources(self):
+        """Test getting scrape sources configuration"""
+        success, response = self.run_test("Get Scrape Sources", "GET", "scrape-sources")
+        if success and isinstance(response, dict):
+            sources = response.get('sources', [])
+            count = response.get('count', 0)
+            print(f"   Found {count} scrape sources")
+            
+            if count == 4:
+                print(f"   ✅ Found expected 4 scrape sources")
+            else:
+                print(f"   ⚠️  Expected 4 scrape sources, found {count}")
+            
+            # Check for specific schools
+            school_slugs = [source.get('school_slug') for source in sources]
+            expected_schools = ['judd-school', 'skinners-school', 'tonbridge-grammar-school', 'dartford-grammar-school']
+            
+            for school in expected_schools:
+                if school in school_slugs:
+                    print(f"   ✅ Found {school} in scrape sources")
+                else:
+                    print(f"   ⚠️  Missing {school} in scrape sources")
+        return success
+
+    def test_cut_off_scores_2026(self):
+        """Test getting cut-off scores for 2026 entry with specific expected scores"""
+        success, response = self.run_test("Get Cut-off Scores for 2026", "GET", "cut-off-scores", params={"entry_year": "2026"})
+        if success and isinstance(response, list):
+            print(f"   Found {len(response)} cut-off score records for 2026")
+            
+            if len(response) == 4:
+                print(f"   ✅ Found expected 4 cut-off scores for 2026")
+            else:
+                print(f"   ⚠️  Expected 4 cut-off scores for 2026, found {len(response)}")
+            
+            # Check specific expected scores
+            expected_scores = {
+                'The Judd School': {'inner': 389, 'outer': 403},
+                'The Skinners\' School': {'inner': 372, 'outer': 384},  # governors_score as outer
+                'Tonbridge Grammar School': {'inner': 378, 'outer': 400},  # governors_score as outer
+                'Dartford Grammar School': {'inner': 381, 'outer': 403}
+            }
+            
+            for score_record in response:
+                school_name = score_record.get('school_name')
+                if school_name in expected_scores:
+                    expected = expected_scores[school_name]
+                    inner_score = score_record.get('inner_area_score')
+                    outer_score = score_record.get('outer_area_score') or score_record.get('governors_score')
+                    
+                    if inner_score == expected['inner']:
+                        print(f"   ✅ {school_name} inner score: {inner_score} (correct)")
+                    else:
+                        print(f"   ⚠️  {school_name} inner score: {inner_score}, expected {expected['inner']}")
+                    
+                    if outer_score == expected['outer']:
+                        print(f"   ✅ {school_name} outer score: {outer_score} (correct)")
+                    else:
+                        print(f"   ⚠️  {school_name} outer score: {outer_score}, expected {expected['outer']}")
+        return success
+
+    def test_schools_compare_with_cutoffs(self):
+        """Test comparing schools functionality with actual school IDs"""
+        # First get some school IDs
+        success, schools_response = self.run_test("Get Schools for Comparison Test", "GET", "schools", params={"sort_by": "name"})
+        if success and isinstance(schools_response, list) and len(schools_response) >= 2:
+            # Get specific schools we know have cut-off data
+            target_schools = ['judd-school', 'skinners-school', 'tonbridge-grammar-school']
+            school_ids = []
+            
+            for school in schools_response:
+                if school.get('slug') in target_schools:
+                    school_ids.append(school['id'])
+                if len(school_ids) >= 3:
+                    break
+            
+            if len(school_ids) >= 2:
+                print(f"   Using {len(school_ids)} school IDs for comparison")
+                compare_data = {"school_ids": school_ids}
+                success, compare_response = self.run_test("Compare Schools with Cut-offs", "POST", "schools/compare", data=compare_data)
+                
+                if success and isinstance(compare_response, list):
+                    print(f"   ✅ Successfully compared {len(compare_response)} schools")
+                    for school in compare_response:
+                        print(f"   - {school.get('name', 'Unknown')}")
+                return success
+            else:
+                print(f"   ❌ Could not find enough target schools for comparison")
+                return False
+        else:
+            print(f"   ❌ Could not get school data for comparison")
+            return False
+
+    def test_scrape_individual_school(self):
+        """Test scraping individual school (Judd School)"""
+        success, response = self.run_test("Scrape Judd School Cut-off", "POST", "scrape-cutoff/judd-school")
+        if success and isinstance(response, dict):
+            if response.get('success'):
+                print(f"   ✅ Successfully scraped Judd School data")
+                extracted_data = response.get('extracted_data', {})
+                if extracted_data:
+                    print(f"   School: {extracted_data.get('school_name', 'Unknown')}")
+                    if 'inner_area_score' in extracted_data:
+                        print(f"   Inner score: {extracted_data['inner_area_score']}")
+                    if 'outer_area_score' in extracted_data:
+                        print(f"   Outer score: {extracted_data['outer_area_score']}")
+            else:
+                print(f"   ⚠️  Scraping failed: {response.get('error', 'Unknown error')}")
+        return success
+
 def main():
     print("🚀 Starting Kent Schools Hub API Tests")
     print("=" * 50)
