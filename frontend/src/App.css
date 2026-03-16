@@ -3,6 +3,16 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Hide Emergent badge */
+#emergent-badge,
+[id*="emergent"],
+a[href*="emergent.sh"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 .school-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
