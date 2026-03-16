@@ -1371,22 +1371,40 @@ const PracticePapersPage = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               <a 
-                href="https://amzn.to/4spcAtu" 
+                href="https://amzn.to/4bnUnp2" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors"
               >
                 <ShoppingCart className="h-4 w-4" />
-                Bond 11+ Books
+                Bond Maths
               </a>
               <a 
-                href="https://amzn.to/413XnlI" 
+                href="https://amzn.to/3Nkx7Aq" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
               >
                 <ShoppingCart className="h-4 w-4" />
-                CGP 11+ Books
+                Bond English
+              </a>
+              <a 
+                href="https://amzn.to/3P8WJ3O" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Bond VR
+              </a>
+              <a 
+                href="https://amzn.to/4dkssZK" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Bond NVR
               </a>
             </div>
           </div>
