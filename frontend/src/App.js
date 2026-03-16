@@ -3083,6 +3083,253 @@ const CutOffScoresPage = () => {
   );
 };
 
+// Contact Page
+const ContactPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    setError('');
+
+    try {
+      await axios.post(`${API}/contact`, formData);
+      setSent(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      setError('Failed to send message. Please try again or email directly.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (sent) {
+    return (
+      <div className="min-h-screen py-16" data-testid="contact-page">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-green-50 rounded-xl border border-green-200 p-12">
+            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+            <h2 className="font-heading text-2xl font-bold text-stone-900 mb-2">Message Sent!</h2>
+            <p className="text-stone-600 mb-6">
+              Thank you for contacting us. We'll get back to you as soon as possible.
+            </p>
+            <button
+              onClick={() => setSent(false)}
+              className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all"
+            >
+              Send Another Message
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-8" data-testid="contact-page">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
+            Contact Us
+          </h1>
+          <p className="text-stone-600 max-w-2xl mx-auto">
+            Have questions about Kent grammar schools or the 11+ process? Want to contribute data or report an issue? We'd love to hear from you.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Contact Form */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-8">
+              <h2 className="font-heading text-xl font-semibold text-stone-900 mb-6 flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                Send us a Message
+              </h2>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-2">
+                      Your Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      placeholder="John Smith"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-stone-700 mb-2">
+                    Subject *
+                  </label>
+                  <select
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+                  >
+                    <option value="">Select a subject...</option>
+                    <option value="General Enquiry">General Enquiry</option>
+                    <option value="School Information">School Information Update</option>
+                    <option value="Cut-off Scores">Cut-off Scores Data</option>
+                    <option value="Open Events">Open Events Information</option>
+                    <option value="Technical Issue">Report a Technical Issue</option>
+                    <option value="Partnership">Partnership / Collaboration</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-stone-700 mb-2">
+                    Message *
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    rows={6}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                    placeholder="How can we help you?"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="w-full px-6 py-4 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {sending ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="h-5 w-5" />
+                      Send Message
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Contact Info Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-primary text-white rounded-xl p-6">
+              <h3 className="font-heading text-lg font-semibold mb-4">Get in Touch</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Email</p>
+                    <a href="mailto:shradsgurram23@gmail.com" className="text-white/80 hover:text-white text-sm">
+                      shradsgurram23@gmail.com
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Response Time</p>
+                    <p className="text-white/80 text-sm">Usually within 24-48 hours</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-4">How Can We Help?</h3>
+              <ul className="space-y-3 text-sm text-stone-600">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>School information updates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Cut-off score submissions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Open event notifications</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Technical issues reporting</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Partnership opportunities</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+              <h3 className="font-heading text-lg font-semibold text-stone-900 mb-2">
+                📝 Data Contributors Welcome
+              </h3>
+              <p className="text-sm text-stone-600">
+                Have updated cut-off scores or event information? We appreciate community contributions to keep our data accurate and up-to-date.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Admin Page for Managing Data
 const AdminPage = () => {
   const [schools, setSchools] = useState([]);
