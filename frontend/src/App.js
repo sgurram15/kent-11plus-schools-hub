@@ -3448,6 +3448,53 @@ const AdminPage = () => {
     }
   };
 
+  // School editing functions
+  const handleEditSchool = (school) => {
+    setEditingSchool(school);
+    setEditForm({
+      name: school.name || '',
+      description: school.description || '',
+      key_strengths: school.key_strengths || '',
+      sixth_form: school.sixth_form || '',
+      founded: school.founded || '',
+      ofsted: school.ofsted || '',
+      attainment_8: school.attainment_8 || '',
+      grade_5_english_maths: school.grade_5_english_maths || '',
+      website: school.website || '',
+      address: school.address || '',
+      pupils: school.pupils || '',
+      places_year7: school.places_year7 || '',
+      open_days: school.open_days || '',
+      competition: school.competition || '',
+      admissions_criteria: school.admissions_criteria || '',
+      catchment_distance: school.catchment_distance || '',
+    });
+  };
+
+  const handleSaveSchool = async () => {
+    if (!editingSchool) return;
+    setSaving(true);
+    try {
+      // Convert numeric fields
+      const updates = { ...editForm };
+      if (updates.attainment_8) updates.attainment_8 = parseFloat(updates.attainment_8);
+      if (updates.grade_5_english_maths) updates.grade_5_english_maths = parseFloat(updates.grade_5_english_maths);
+      if (updates.pupils) updates.pupils = parseInt(updates.pupils);
+      if (updates.places_year7) updates.places_year7 = parseInt(updates.places_year7);
+      
+      const response = await axios.put(`${API}/schools/${editingSchool.id}`, updates);
+      
+      // Update local state
+      setSchools(prev => prev.map(s => s.id === editingSchool.id ? response.data : s));
+      setEditingSchool(null);
+      alert('School updated successfully!');
+    } catch (e) {
+      alert('Error saving: ' + (e.response?.data?.detail || e.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSchoolSelect = (slug) => {
     const school = schools.find(s => s.slug === slug);
     if (school) {
