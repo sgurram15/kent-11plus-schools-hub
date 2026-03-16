@@ -1499,7 +1499,7 @@ const PracticePapersPage = () => {
               <p className="text-xs text-stone-500 mb-4">Best-selling 11+ preparation materials</p>
               
               <div className="space-y-3">
-                {/* MOST IMPORTANT - VR Book */}
+                {/* MOST IMPORTANT - NVR Book */}
                 <a 
                   href="https://amzn.to/3PbCimJ" 
                   target="_blank" 
@@ -1514,7 +1514,7 @@ const PracticePapersPage = () => {
                       <AlertCircle className="h-5 w-5 text-red-600" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-red-900 text-sm group-hover:text-red-700 transition-colors">Bond VR 10-11+ ⭐</h4>
+                      <h4 className="font-bold text-red-900 text-sm group-hover:text-red-700 transition-colors">Bond NVR 10-11+ ⭐</h4>
                       <p className="text-xs text-red-600 mt-0.5 font-medium">Most students fail here!</p>
                       <span className="inline-flex items-center text-xs text-red-700 mt-1 font-bold">
                         Buy Now <ExternalLink className="h-3 w-3 ml-1" />
