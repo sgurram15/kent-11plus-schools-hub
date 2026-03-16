@@ -3702,6 +3702,14 @@ const AdminPage = () => {
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
+            onClick={() => setActiveTab('schools')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'schools' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+            }`}
+          >
+            Schools ({schools.length})
+          </button>
+          <button
             onClick={() => setActiveTab('events')}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               activeTab === 'events' ? 'bg-primary text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -3742,6 +3750,298 @@ const AdminPage = () => {
             Scrape Helper
           </button>
         </div>
+
+        {/* Schools Tab */}
+        {activeTab === 'schools' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-stone-900">Manage Schools</h2>
+                  <p className="text-stone-600 text-sm mt-1">Edit school information, key strengths, and details</p>
+                </div>
+                <span className="text-sm text-stone-500">
+                  {schools.filter(s => s.key_strengths).length}/{schools.length} have key strengths
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {schools.map(school => (
+                  <div 
+                    key={school.id} 
+                    className={`border rounded-lg p-4 hover:border-purple-300 transition-all ${
+                      !school.key_strengths ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-stone-900">{school.name}</h3>
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            school.gender === 'boys' ? 'bg-blue-100 text-blue-700' :
+                            school.gender === 'girls' ? 'bg-pink-100 text-pink-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {school.type}
+                          </span>
+                          {school.ofsted && (
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              school.ofsted === 'Outstanding' ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-600'
+                            }`}>
+                              {school.ofsted}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-stone-500 mt-1">{school.address}</p>
+                        {school.key_strengths ? (
+                          <p className="text-sm text-green-700 mt-2">
+                            <strong>Key Strengths:</strong> {school.key_strengths}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-amber-600 mt-2 italic">
+                            ⚠️ No key strengths set
+                          </p>
+                        )}
+                        {school.sixth_form && (
+                          <p className="text-sm text-stone-600 mt-1">
+                            <strong>Sixth Form:</strong> {school.sixth_form}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleEditSchool(school)}
+                        className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-200 transition-all flex items-center gap-2"
+                      >
+                        <FileText className="h-4 w-4" />
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit School Modal */}
+        {editingSchool && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-stone-200 p-6 flex justify-between items-center">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-stone-900">Edit School</h2>
+                  <p className="text-sm text-stone-500">{editingSchool.name}</p>
+                </div>
+                <button
+                  onClick={() => setEditingSchool(null)}
+                  className="p-2 hover:bg-stone-100 rounded-lg"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Key Strengths - Highlighted */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <label className="block text-sm font-semibold text-purple-900 mb-2">
+                    Key Strengths ⭐
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.key_strengths}
+                    onChange={(e) => setEditForm(prev => ({...prev, key_strengths: e.target.value}))}
+                    className="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    placeholder="e.g., STEM excellence, Strong Music programme, IB Diploma"
+                  />
+                  <p className="text-xs text-purple-600 mt-1">Comma-separated key strengths or focus areas</p>
+                </div>
+
+                {/* Sixth Form */}
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Sixth Form</label>
+                  <input
+                    type="text"
+                    value={editForm.sixth_form}
+                    onChange={(e) => setEditForm(prev => ({...prev, sixth_form: e.target.value}))}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="e.g., Co-educational, Girls only, IB available"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Description</label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm(prev => ({...prev, description: e.target.value}))}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                  />
+                </div>
+
+                {/* Two columns for smaller fields */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">Founded</label>
+                    <input
+                      type="text"
+                      value={editForm.founded}
+                      onChange={(e) => setEditForm(prev => ({...prev, founded: e.target.value}))}
+                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      placeholder="e.g., 1888"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">Ofsted Rating</label>
+                    <select
+                      value={editForm.ofsted}
+                      onChange={(e) => setEditForm(prev => ({...prev, ofsted: e.target.value}))}
+                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+                    >
+                      <option value="">Select rating</option>
+                      <option value="Outstanding">Outstanding</option>
+                      <option value="Good">Good</option>
+                      <option value="Requires Improvement">Requires Improvement</option>
+                      <option value="Inadequate">Inadequate</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">Attainment 8 Score</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editForm.attainment_8}
+                      onChange={(e) => setEditForm(prev => ({...prev, attainment_8: e.target.value}))}
+                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">Grade 5+ Eng & Maths (%)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editForm.grade_5_english_maths}
+                      onChange={(e) => setEditForm(prev => ({...prev, grade_5_english_maths: e.target.value}))}
+                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">Total Pupils</label>
+                    <input
+                      type="number"
+                      value={editForm.pupils}
+                      onChange={(e) => setEditForm(prev => ({...prev, pupils: e.target.value}))}
+                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">Year 7 Places</label>
+                    <input
+                      type="number"
+                      value={editForm.places_year7}
+                      onChange={(e) => setEditForm(prev => ({...prev, places_year7: e.target.value}))}
+                      className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Website</label>
+                  <input
+                    type="url"
+                    value={editForm.website}
+                    onChange={(e) => setEditForm(prev => ({...prev, website: e.target.value}))}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Address</label>
+                  <input
+                    type="text"
+                    value={editForm.address}
+                    onChange={(e) => setEditForm(prev => ({...prev, address: e.target.value}))}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Open Days</label>
+                  <input
+                    type="text"
+                    value={editForm.open_days}
+                    onChange={(e) => setEditForm(prev => ({...prev, open_days: e.target.value}))}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="e.g., September/October"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Competition</label>
+                  <input
+                    type="text"
+                    value={editForm.competition}
+                    onChange={(e) => setEditForm(prev => ({...prev, competition: e.target.value}))}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="e.g., 5 applicants for every place"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Admissions Criteria</label>
+                  <input
+                    type="text"
+                    value={editForm.admissions_criteria}
+                    onChange={(e) => setEditForm(prev => ({...prev, admissions_criteria: e.target.value}))}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">Catchment Info</label>
+                  <input
+                    type="text"
+                    value={editForm.catchment_distance}
+                    onChange={(e) => setEditForm(prev => ({...prev, catchment_distance: e.target.value}))}
+                    className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="sticky bottom-0 bg-white border-t border-stone-200 p-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setEditingSchool(null)}
+                  className="px-6 py-2 border border-stone-200 text-stone-700 rounded-lg font-medium hover:bg-stone-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveSchool}
+                  disabled={saving}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {saving ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Contact Queries Tab */}
         {activeTab === 'contact' && (
