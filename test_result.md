@@ -217,6 +217,56 @@ test_plan:
   test_all: true
   test_priority: "high_first"
 
+  - task: "Scrape Sources API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/scrape-sources returns exactly 4 configured sources as expected. All target schools (Judd, Skinners, Tonbridge, Dartford) present in scrape sources configuration."
+
+  - task: "Cut-off Scores API with 2026 Data"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/cut-off-scores returns 4 scores for 2026 entry with correct values: Judd (389/403), Skinners (372/384), Tonbridge (378/400), Dartford (381/403). All scores verified against expected values."
+
+  - task: "Schools Compare with Cut-offs Integration"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "POST /api/schools/compare works correctly with school IDs. Successfully compared 3 schools (Judd, Tonbridge, Skinners) with proper validation and response structure."
+
+  - task: "Individual School Scraping Endpoint"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "POST /api/scrape-cutoff/judd-school successfully scrapes and extracts cut-off data. Returns structured data with inner score (389) and outer score (403) correctly extracted from live website."
+
 agent_communication:
     - agent: "testing"
       message: "Comprehensive backend API testing completed successfully. All 22 tests passed with 100% success rate. All requested endpoints verified: Health Check, Schools API (31 schools), Cut-off Scores (2 records), Open Events (7 events), and Compare Schools functionality all working correctly."
+    - agent: "testing"
+      message: "NEW SCRAPING AND CUT-OFF FEATURES TESTING COMPLETED: All 4 new scraping infrastructure endpoints tested and verified working. Scrape Sources API returns 4 configured sources, Cut-off Scores API returns correct 2026 data for all 4 schools with exact expected scores, Schools Compare integration works with cut-offs, and Individual Scrape endpoint successfully extracts live data from Judd School website. Total test suite: 27/27 tests passed (100% success rate)."
