@@ -1780,6 +1780,106 @@ async def seed_cut_off_scores():
     
     return {"message": f"Seeded {len(initial_scores)} cut-off scores successfully"}
 
+# ============================================
+# CONTACT QUERY ENDPOINTS
+# ============================================
+
+@api_router.post("/contact", response_model=ContactQueryResponse)
+async def submit_contact_query(query: ContactQueryCreate):
+    """Submit a contact query - stores in DB and sends email notification"""
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    contact = ContactQuery(
+        name=query.name,
+        email=query.email,
+        subject=query.subject,
+        message=query.message
+    )
+    
+    doc = contact.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.contact_queries.insert_one(doc)
+    
+    # Try to send email notification (using Gmail SMTP or environment configured SMTP)
+    try:
+        smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+        smtp_user = os.environ.get('SMTP_USER', '')
+        smtp_pass = os.environ.get('SMTP_PASS', '')
+        recipient_email = os.environ.get('CONTACT_EMAIL', 'shradsgurram23@gmail.com')
+        
+        if smtp_user and smtp_pass:
+            msg = MIMEMultipart()
+            msg['From'] = smtp_user
+            msg['To'] = recipient_email
+            msg['Subject'] = f"[Kent 11+ Hub] New Contact: {query.subject}"
+            
+            body = f"""
+New contact query received from Kent 11+ Schools Hub:
+
+Name: {query.name}
+Email: {query.email}
+Subject: {query.subject}
+
+Message:
+{query.message}
+
+---
+Reply directly to: {query.email}
+            """
+            msg.attach(MIMEText(body, 'plain'))
+            
+            with smtplib.SMTP(smtp_host, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+                
+            logger.info(f"Contact email sent to {recipient_email}")
+    except Exception as e:
+        logger.warning(f"Failed to send contact email: {e}")
+        # Still save to DB even if email fails
+    
+    return ContactQueryResponse(
+        id=contact.id,
+        name=contact.name,
+        email=contact.email,
+        subject=contact.subject,
+        message=contact.message,
+        status=contact.status,
+        created_at=doc['created_at']
+    )
+
+@api_router.get("/contact", response_model=List[ContactQueryResponse])
+async def get_contact_queries(status: Optional[str] = None):
+    """Get all contact queries (for admin)"""
+    query = {}
+    if status:
+        query['status'] = status
+    
+    queries = await db.contact_queries.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return queries
+
+@api_router.put("/contact/{query_id}/status")
+async def update_query_status(query_id: str, status: str = Body(..., embed=True)):
+    """Update contact query status"""
+    result = await db.contact_queries.update_one(
+        {"id": query_id},
+        {"$set": {"status": status}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Query not found")
+    return {"message": "Status updated", "status": status}
+
+@api_router.delete("/contact/{query_id}")
+async def delete_contact_query(query_id: str):
+    """Delete a contact query"""
+    result = await db.contact_queries.delete_one({"id": query_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Query not found")
+    return {"message": "Query deleted"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
