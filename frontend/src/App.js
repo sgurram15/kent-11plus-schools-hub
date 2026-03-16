@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare, Calendar, Clock, Bell, CheckCircle, AlertCircle, FileText, Mail, Award } from "lucide-react";
+import { Search, MapPin, Users, GraduationCap, Trophy, ExternalLink, ArrowRight, Filter, X, ChevronDown, BookOpen, Building2, Scale, Menu, Home as HomeIcon, List, GitCompare, Calendar, Clock, Bell, CheckCircle, AlertCircle, FileText, Mail, Award, ShoppingCart } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
