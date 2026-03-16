@@ -55,7 +55,7 @@ class School(BaseModel):
     website: str
     description: str
     # School-specific unique features
-    specialist_status: str = ""  # e.g., "Language College", "Science Specialist"
+    key_strengths: str = ""  # Key academic strengths or focus areas
     sixth_form: str = ""  # e.g., "Co-educational", "IB Programme available"
     highlights: List[str] = []  # Unique features/achievements
     founded: str = ""  # Year founded if known
