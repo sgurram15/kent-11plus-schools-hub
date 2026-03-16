@@ -1487,26 +1487,207 @@ async def seed_open_events():
     
     return {"message": f"Seeded {len(initial_events)} open events successfully"}
 
+# ============================================
+# SCRAPE SOURCES CONFIGURATION
+# ============================================
+
+SCRAPE_SOURCES = [
+    {
+        "school_slug": "judd-school",
+        "school_name": "The Judd School",
+        "url": "https://www.judd.online/y7-joiners",
+        "type": "html",
+        "description": "Year 7 Admissions page with cut-off scores"
+    },
+    {
+        "school_slug": "tonbridge-grammar-school",
+        "school_name": "Tonbridge Grammar School",
+        "url": "https://www.tgs.kent.sch.uk/join-us-in-year-7",
+        "type": "html",
+        "description": "Year 7 entry page with threshold scores"
+    },
+    {
+        "school_slug": "skinners-school",
+        "school_name": "The Skinners' School",
+        "url": "https://www.skinners-school.co.uk/38/2026-year-7-admission-information-updated-2nd-march",
+        "type": "html",
+        "description": "2026 Year 7 Admission Information"
+    },
+    {
+        "school_slug": "dartford-grammar-school",
+        "school_name": "Dartford Grammar School",
+        "url": "https://www.dartfordgrammarschool.org.uk/docs/Admissions_Y7/Cut_off_scores_March_2026.pdf",
+        "type": "pdf",
+        "description": "Cut-off scores PDF for March 2026"
+    }
+]
+
+@api_router.get("/scrape-sources")
+async def get_scrape_sources():
+    """Get all configured scrape sources for cut-off scores"""
+    return {"sources": SCRAPE_SOURCES, "count": len(SCRAPE_SOURCES)}
+
+@api_router.post("/scrape-cutoff/{school_slug}")
+async def scrape_cutoff_score(school_slug: str):
+    """Scrape cut-off score data from a specific school's website"""
+    
+    # Find the source configuration
+    source = next((s for s in SCRAPE_SOURCES if s["school_slug"] == school_slug), None)
+    if not source:
+        raise HTTPException(status_code=404, detail=f"No scrape source configured for {school_slug}")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(source["url"], follow_redirects=True)
+            response.raise_for_status()
+        
+        text_content = ""
+        if source["type"] == "html":
+            soup = BeautifulSoup(response.text, 'html.parser')
+            text_content = soup.get_text(separator=' ', strip=True)
+        else:
+            # For PDF, return info that it needs manual extraction
+            return {
+                "success": True,
+                "school_slug": school_slug,
+                "school_name": source["school_name"],
+                "url": source["url"],
+                "type": "pdf",
+                "message": "PDF detected. Please use the PDF extraction tool or enter data manually.",
+                "source_url": source["url"]
+            }
+        
+        # Extract scores using regex patterns
+        extracted_data = {
+            "school_slug": school_slug,
+            "school_name": source["school_name"],
+            "source_url": source["url"]
+        }
+        
+        # Pattern for cut-off scores
+        cutoff_patterns = [
+            (r'cut-?off\s*(?:score)?\s*(?:for\s*(?:the\s*)?(?:inner|area))?\s*(?:was)?\s*\**(\d{3})\**', 'inner_area_score'),
+            (r'inner\s*area\s*(?:was|:)?\s*\**(\d{3})\**', 'inner_area_score'),
+            (r'outer\s*area\s*(?:being|was|:)?\s*\**(\d{3})\**', 'outer_area_score'),
+            (r'Area\s*offers?\s*was\s*\**(\d{3})\**', 'inner_area_score'),
+            (r'Trustee\s*offers?\s*was\s*\**(\d{3})\**', 'governors_score'),
+            (r'Governors\'\s*places.*?lowest\s*score.*?(\d{3})', 'governors_score'),
+            (r'(\d{3})\s*or\s*higher', 'inner_area_score'),
+        ]
+        
+        for pattern, field in cutoff_patterns:
+            match = re.search(pattern, text_content, re.IGNORECASE)
+            if match and field not in extracted_data:
+                extracted_data[field] = int(match.group(1))
+        
+        # Pattern for places/offers
+        offers_patterns = [
+            (r'(\d+)\s*offers?\s*(?:were\s*)?made', 'total_offers'),
+            (r'(\d+)\s*places?\s*(?:have\s*been\s*)?offered?\s*to\s*(?:those\s*)?(?:living\s*)?(?:in\s*)?(?:the\s*)?(?:inner|West\s*Kent)', 'inner_area_places'),
+            (r'(\d+)\s*places?\s*(?:have\s*been\s*)?offered?\s*to\s*(?:those\s*)?(?:living\s*)?(?:in\s*)?(?:the\s*)?(?:outer|Outer)', 'outer_area_places'),
+            (r'inner\s*area\s*is\s*(\d+)', 'inner_area_places'),
+            (r'outer\s*area\s*is\s*(\d+)', 'outer_area_places'),
+        ]
+        
+        for pattern, field in offers_patterns:
+            match = re.search(pattern, text_content, re.IGNORECASE)
+            if match and field not in extracted_data:
+                extracted_data[field] = int(match.group(1))
+        
+        # Pattern for distances
+        distance_patterns = [
+            (r'furthest\s*place\s*offered\s*is\s*\**(\d+\.?\d*)\s*miles?\**', 'furthest_distance_inner'),
+            (r'distance\s*tie-?break.*?(\d+\.?\d*)\s*miles', 'furthest_distance_inner'),
+        ]
+        
+        for pattern, field in distance_patterns:
+            match = re.search(pattern, text_content, re.IGNORECASE)
+            if match and field not in extracted_data:
+                extracted_data[field] = f"{match.group(1)} miles"
+        
+        # Pattern for mean scores
+        mean_patterns = [
+            (r'mean\s*score.*?Inner.*?(\d{3}\.?\d*)', 'mean_score_inner'),
+            (r'mean\s*score.*?Outer.*?(\d{3}\.?\d*)', 'mean_score_outer'),
+        ]
+        
+        for pattern, field in mean_patterns:
+            match = re.search(pattern, text_content, re.IGNORECASE | re.DOTALL)
+            if match and field not in extracted_data:
+                extracted_data[field] = float(match.group(1))
+        
+        return {
+            "success": True,
+            "extracted_data": extracted_data,
+            "text_preview": text_content[:2000],
+            "message": "Data extracted. Please review before saving."
+        }
+        
+    except httpx.HTTPError as e:
+        return {
+            "success": False,
+            "error": f"HTTP error: {str(e)}",
+            "url": source["url"]
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "url": source["url"]
+        }
+
+@api_router.post("/scrape-all-cutoffs")
+async def scrape_all_cutoffs():
+    """Scrape cut-off scores from all configured sources"""
+    results = []
+    for source in SCRAPE_SOURCES:
+        try:
+            if source["type"] == "pdf":
+                results.append({
+                    "school_slug": source["school_slug"],
+                    "school_name": source["school_name"],
+                    "status": "skipped",
+                    "reason": "PDF - requires manual extraction",
+                    "url": source["url"]
+                })
+                continue
+                
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(source["url"], follow_redirects=True)
+                response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            text_content = soup.get_text(separator=' ', strip=True)
+            
+            # Extract basic score info
+            inner_match = re.search(r'(?:inner|area)\s*(?:cut-?off|score)?\s*(?:was|:)?\s*\**(\d{3})\**', text_content, re.IGNORECASE)
+            outer_match = re.search(r'outer\s*(?:area)?\s*(?:being|was|:)?\s*\**(\d{3})\**', text_content, re.IGNORECASE)
+            
+            results.append({
+                "school_slug": source["school_slug"],
+                "school_name": source["school_name"],
+                "status": "success",
+                "inner_area_score": int(inner_match.group(1)) if inner_match else None,
+                "outer_area_score": int(outer_match.group(1)) if outer_match else None,
+                "url": source["url"]
+            })
+        except Exception as e:
+            results.append({
+                "school_slug": source["school_slug"],
+                "school_name": source["school_name"],
+                "status": "error",
+                "error": str(e),
+                "url": source["url"]
+            })
+    
+    return {"results": results, "total": len(results)}
+
 @api_router.post("/seed-cut-off-scores")
 async def seed_cut_off_scores():
-    """Seed the database with initial cut-off score data"""
+    """Seed the database with comprehensive cut-off score data from all schools"""
     
-    # Initial cut-off scores from scraped data
+    # Comprehensive cut-off scores from scraped data (2026 entry)
     initial_scores = [
-        {
-            "school_slug": "skinners-school",
-            "school_name": "The Skinners' School",
-            "entry_year": "2026",
-            "inner_area_score": 372,
-            "governors_score": 384,
-            "furthest_distance_inner": "5.474 miles",
-            "furthest_distance_outer": "13.921 miles",
-            "total_offers": 160,
-            "inner_area_places": 140,
-            "outer_area_places": 20,
-            "notes": "West Kent Area: 124 places + 16 Governors' places. Outer Area: 20 places. Score of 372+ required, ranked by distance.",
-            "source_url": "https://www.skinners-school.co.uk/38/2026-year-7-admission-information-updated-2nd-march"
-        },
         {
             "school_slug": "judd-school",
             "school_name": "The Judd School",
@@ -1518,8 +1699,43 @@ async def seed_cut_off_scores():
             "outer_area_places": 23,
             "mean_score_inner": 396.5,
             "mean_score_outer": 409.2,
-            "notes": "Inner area cut-off increased from 371 (2025) to 389 (2026). Outer area from 398 to 403.",
+            "notes": "Inner area cut-off increased from 371 (2025) to 389 (2026). Outer area from 398 to 403. ~20 offers made from waiting list annually.",
             "source_url": "https://www.judd.online/y7-joiners"
+        },
+        {
+            "school_slug": "tonbridge-grammar-school",
+            "school_name": "Tonbridge Grammar School",
+            "entry_year": "2026",
+            "inner_area_score": 378,
+            "governors_score": 400,
+            "furthest_distance_inner": "4.7 miles",
+            "furthest_distance_outer": "14.6 miles",
+            "notes": "Area offers cut-off: 378 with 4.7 miles distance tie-break. Trustee offers cut-off: 400 with 14.6 miles tie-break.",
+            "source_url": "https://www.tgs.kent.sch.uk/join-us-in-year-7"
+        },
+        {
+            "school_slug": "skinners-school",
+            "school_name": "The Skinners' School",
+            "entry_year": "2026",
+            "inner_area_score": 372,
+            "governors_score": 384,
+            "furthest_distance_inner": "5.474 miles",
+            "furthest_distance_outer": "13.921 miles",
+            "total_offers": 160,
+            "inner_area_places": 140,
+            "outer_area_places": 20,
+            "notes": "West Kent Area: 124 places + 16 Governors' places (ranked by score, lowest 384). Outer Area: 20 places. Minimum score 372 required.",
+            "source_url": "https://www.skinners-school.co.uk/38/2026-year-7-admission-information-updated-2nd-march"
+        },
+        {
+            "school_slug": "dartford-grammar-school",
+            "school_name": "Dartford Grammar School",
+            "entry_year": "2026",
+            "inner_area_score": 381,
+            "outer_area_score": 403,
+            "pupil_premium_score": 368,
+            "notes": "Priority Area: 381 (Pupil Premium: 368). Category 2 All addresses: 403 (Pupil Premium: 392).",
+            "source_url": "https://www.dartfordgrammarschool.org.uk/docs/Admissions_Y7/Cut_off_scores_March_2026.pdf"
         },
     ]
     
