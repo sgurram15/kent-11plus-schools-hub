@@ -3339,12 +3339,17 @@ const AdminPage = () => {
   const [scrapeSources, setScrapeSources] = useState([]);
   const [contactQueries, setContactQueries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('events');
+  const [activeTab, setActiveTab] = useState('schools');
   const [scrapeUrl, setScrapeUrl] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('');
   const [scrapeResult, setScrapeResult] = useState(null);
   const [scraping, setScraping] = useState(false);
   const [refreshingScores, setRefreshingScores] = useState(false);
+  
+  // Edit school modal state
+  const [editingSchool, setEditingSchool] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
   
   // Form states for new event
   const [newEvent, setNewEvent] = useState({
