@@ -11,7 +11,7 @@ import os
 import uuid
 
 # Use external URL for production-like testing
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://kent-11-plus-hub.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://schools-hub-kent.preview.emergentagent.com')
 
 
 class TestOpenEventsAPI:

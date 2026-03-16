@@ -227,7 +227,7 @@ Build a website for Kent 11+ admissions that includes:
 - Frontend is a monolithic App.js file (needs refactoring)
 
 ## Deployment
-- Preview URL: https://kent-11-plus-hub.preview.emergentagent.com
+- Preview URL: https://schools-hub-kent.preview.emergentagent.com
 - Deployment health check: Passed
 - GitHub: Code pushed to user repository
 - Deployment documentation: `/app/DEPLOYMENT.md`
