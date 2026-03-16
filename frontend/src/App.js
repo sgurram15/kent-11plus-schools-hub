@@ -1358,7 +1358,7 @@ const PracticePapersPage = () => {
           </div>
         </div>
 
-        {/* IMPORTANT: Verbal Reasoning Warning */}
+        {/* IMPORTANT: Non-Verbal Reasoning Warning */}
         <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-300 rounded-xl p-6 mb-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
             ⚠️ MOST IMPORTANT
@@ -1367,14 +1367,14 @@ const PracticePapersPage = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="h-6 w-6 text-red-600" />
-                <h3 className="font-bold text-lg text-red-900">Verbal Reasoning - Where Most Students Fail!</h3>
+                <h3 className="font-bold text-lg text-red-900">Non-Verbal Reasoning - Where Most Students Fail!</h3>
               </div>
               <p className="text-red-800 text-sm mb-3">
-                <strong>Most ignored but most important!</strong> Verbal Reasoning is the section where students lose the most marks. 
-                It requires consistent daily practice to master vocabulary, word relationships, and logical thinking patterns.
+                <strong>Most ignored but most important!</strong> Non-Verbal Reasoning is the section where students lose the most marks. 
+                It requires consistent daily practice to master pattern recognition, spatial awareness, and logical thinking.
               </p>
               <ul className="text-sm text-red-700 space-y-1">
-                <li>✗ Most students underestimate VR difficulty</li>
+                <li>✗ Most students underestimate NVR difficulty</li>
                 <li>✗ Cannot be crammed last minute - needs months of practice</li>
                 <li>✓ Regular practice dramatically improves scores</li>
               </ul>
@@ -1387,7 +1387,7 @@ const PracticePapersPage = () => {
                 className="inline-flex flex-col items-center gap-2 px-6 py-4 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <span className="text-2xl">📕</span>
-                <span className="font-bold">Bond VR 10-11+</span>
+                <span className="font-bold">Bond NVR 10-11+</span>
                 <span className="text-xs opacity-90">Essential Practice Book</span>
                 <span className="flex items-center gap-1 text-xs bg-white/20 px-2 py-1 rounded">
                   <ShoppingCart className="h-3 w-3" />
