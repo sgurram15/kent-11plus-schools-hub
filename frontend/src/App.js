@@ -2327,7 +2327,7 @@ const KeyDatesPage = () => {
                 <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-stone-200" />
                 
                 <div className="space-y-6">
-                  {keyDates.map((event, index) => (
+                  {processedDates.map((event, index) => (
                     <div key={event.id} className="relative flex gap-4 pl-14">
                       {/* Timeline dot */}
                       <div className={`absolute left-4 w-5 h-5 rounded-full border-2 ${
@@ -2359,6 +2359,9 @@ const KeyDatesPage = () => {
                         </div>
                         <h3 className="font-semibold text-stone-900 mb-1">{event.title}</h3>
                         <p className="text-sm text-stone-600">{event.description}</p>
+                        {event.source && (
+                          <p className="text-xs text-stone-400 mt-2">Source: {event.source}</p>
+                        )}
                         {event.id === nextUpcoming?.id && (
                           <p className="text-xs text-amber-700 mt-2 font-medium">
                             {Math.ceil((event.dateObj - today) / (1000 * 60 * 60 * 24))} days from now
