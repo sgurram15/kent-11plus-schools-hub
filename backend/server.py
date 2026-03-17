@@ -1941,6 +1941,167 @@ async def delete_contact_query(query_id: str):
         raise HTTPException(status_code=404, detail="Query not found")
     return {"message": "Query deleted"}
 
+# ============================================
+# KEY DATES ENDPOINTS
+# ============================================
+
+@api_router.get("/key-dates", response_model=List[KeyDateResponse])
+async def get_key_dates(year_cycle: Optional[str] = None):
+    """Get all key dates, optionally filtered by year cycle"""
+    query = {}
+    if year_cycle:
+        query['year_cycle'] = year_cycle
+    
+    dates = await db.key_dates.find(query, {"_id": 0}).sort("date_iso", 1).to_list(100)
+    return dates
+
+@api_router.post("/key-dates", response_model=KeyDateResponse)
+async def create_key_date(key_date: KeyDateCreate):
+    """Create a new key date"""
+    date = KeyDate(
+        date=key_date.date,
+        date_iso=key_date.date_iso,
+        title=key_date.title,
+        description=key_date.description,
+        category=key_date.category,
+        year_cycle=key_date.year_cycle,
+        source=key_date.source
+    )
+    
+    doc = date.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['updated_at'] = doc['updated_at'].isoformat()
+    await db.key_dates.insert_one(doc)
+    
+    return KeyDateResponse(**doc)
+
+@api_router.put("/key-dates/{date_id}", response_model=KeyDateResponse)
+async def update_key_date(date_id: str, updates: KeyDateCreate):
+    """Update a key date"""
+    update_data = updates.model_dump()
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.key_dates.update_one(
+        {"id": date_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Key date not found")
+    
+    updated = await db.key_dates.find_one({"id": date_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/key-dates/{date_id}")
+async def delete_key_date(date_id: str):
+    """Delete a key date"""
+    result = await db.key_dates.delete_one({"id": date_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Key date not found")
+    return {"message": "Key date deleted"}
+
+@api_router.post("/seed-key-dates")
+async def seed_key_dates():
+    """Seed the database with initial key dates for 2025/2026 cycle"""
+    
+    # Data sourced from Kent County Council official website
+    # https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test
+    initial_dates = [
+        {
+            "date": "2 June 2025",
+            "date_iso": "2025-06-02",
+            "title": "Kent Test Registration Opens",
+            "description": "Online registration opens for the September 2025 Kent Test",
+            "category": "registration",
+            "year_cycle": "2025/2026",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "1 July 2025",
+            "date_iso": "2025-07-01",
+            "title": "Kent Test Registration Closes",
+            "description": "Deadline to register your child for the Kent Test. Late registrations may be accepted - contact kent.admissions@kent.gov.uk",
+            "category": "registration",
+            "year_cycle": "2025/2026",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "11 September 2025",
+            "date_iso": "2025-09-11",
+            "title": "Kent Test Takes Place",
+            "description": "Children sit the Kent Test at designated test centres. Two papers: Reasoning (50 mins) and English & Maths (60 mins)",
+            "category": "exam",
+            "year_cycle": "2025/2026",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "16 October 2025",
+            "date_iso": "2025-10-16",
+            "title": "Kent Test Results Day",
+            "description": "Results emailed to parents. Grammar threshold for 2025: total score of 332+ with no single score below 108",
+            "category": "results",
+            "year_cycle": "2025/2026",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "31 October 2025",
+            "date_iso": "2025-10-31",
+            "title": "Secondary School Application Deadline",
+            "description": "Deadline to submit secondary school applications via your local authority. Name up to 4 school preferences",
+            "category": "application",
+            "year_cycle": "2025/2026",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "2 March 2026",
+            "date_iso": "2026-03-02",
+            "title": "National Offer Day",
+            "description": "Secondary school places are offered. Check your email or local authority portal for your child's school allocation",
+            "category": "results",
+            "year_cycle": "2025/2026",
+            "source": "Department for Education"
+        },
+        {
+            "date": "16 March 2026",
+            "date_iso": "2026-03-16",
+            "title": "Appeal Deadline",
+            "description": "Deadline to submit appeals if you wish to challenge your school allocation. Appeals heard by independent panels",
+            "category": "application",
+            "year_cycle": "2025/2026",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "1 May 2026",
+            "date_iso": "2026-05-01",
+            "title": "2026 Kent Test Details Released",
+            "description": "Information and dates for the September 2026 Kent Test will be published on Kent County Council website",
+            "category": "registration",
+            "year_cycle": "2026/2027",
+            "source": "Kent County Council - kent.gov.uk"
+        },
+        {
+            "date": "1 June 2026",
+            "date_iso": "2026-06-01",
+            "title": "2026 Registration Opens",
+            "description": "Registration opens for children entering Year 6 in September 2026 who wish to take the Kent Test",
+            "category": "registration",
+            "year_cycle": "2026/2027",
+            "source": "Kent County Council - kent.gov.uk"
+        }
+    ]
+    
+    # Clear existing and insert new
+    await db.key_dates.delete_many({})
+    
+    for date_data in initial_dates:
+        date = KeyDate(**date_data)
+        doc = date.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        await db.key_dates.insert_one(doc)
+    
+    return {"message": f"Seeded {len(initial_dates)} key dates successfully"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
