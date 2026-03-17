@@ -3416,22 +3416,37 @@ const AdminPage = () => {
   
   // State for editing existing scores
   const [editingScore, setEditingScore] = useState(null);
+  
+  // Key Dates state
+  const [keyDates, setKeyDates] = useState([]);
+  const [editingKeyDate, setEditingKeyDate] = useState(null);
+  const [newKeyDate, setNewKeyDate] = useState({
+    date: '',
+    date_iso: '',
+    title: '',
+    description: '',
+    category: 'registration',
+    year_cycle: '2025/2026',
+    source: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [schoolsRes, eventsRes, scoresRes, sourcesRes, contactRes] = await Promise.all([
+        const [schoolsRes, eventsRes, scoresRes, sourcesRes, contactRes, keyDatesRes] = await Promise.all([
           axios.get(`${API}/schools`),
           axios.get(`${API}/open-events`),
           axios.get(`${API}/cut-off-scores`),
           axios.get(`${API}/scrape-sources`),
-          axios.get(`${API}/contact`)
+          axios.get(`${API}/contact`),
+          axios.get(`${API}/key-dates`)
         ]);
         setSchools(schoolsRes.data);
         setEvents(eventsRes.data);
         setScores(scoresRes.data);
         setScrapeSources(sourcesRes.data.sources || []);
         setContactQueries(contactRes.data);
+        setKeyDates(keyDatesRes.data);
       } catch (e) {
         console.error("Error fetching data:", e);
       } finally {
