@@ -3531,6 +3531,72 @@ const AdminPage = () => {
     }
   };
 
+  // Key Dates handlers
+  const handleAddKeyDate = async () => {
+    if (!newKeyDate.date || !newKeyDate.title) {
+      alert('Please fill in date and title');
+      return;
+    }
+    try {
+      const response = await axios.post(`${API}/key-dates`, newKeyDate);
+      setKeyDates(prev => [...prev, response.data].sort((a, b) => a.date_iso.localeCompare(b.date_iso)));
+      setNewKeyDate({
+        date: '',
+        date_iso: '',
+        title: '',
+        description: '',
+        category: 'registration',
+        year_cycle: '2025/2026',
+        source: ''
+      });
+      alert('Key date added successfully!');
+    } catch (e) {
+      alert('Error adding key date: ' + e.message);
+    }
+  };
+
+  const handleUpdateKeyDate = async () => {
+    if (!editingKeyDate) return;
+    try {
+      const response = await axios.put(`${API}/key-dates/${editingKeyDate.id}`, {
+        date: editingKeyDate.date,
+        date_iso: editingKeyDate.date_iso,
+        title: editingKeyDate.title,
+        description: editingKeyDate.description,
+        category: editingKeyDate.category,
+        year_cycle: editingKeyDate.year_cycle,
+        source: editingKeyDate.source
+      });
+      setKeyDates(prev => prev.map(d => d.id === editingKeyDate.id ? response.data : d));
+      setEditingKeyDate(null);
+      alert('Key date updated!');
+    } catch (e) {
+      alert('Error updating: ' + e.message);
+    }
+  };
+
+  const handleDeleteKeyDate = async (id) => {
+    if (!window.confirm('Delete this key date?')) return;
+    try {
+      await axios.delete(`${API}/key-dates/${id}`);
+      setKeyDates(prev => prev.filter(d => d.id !== id));
+    } catch (e) {
+      alert('Error deleting: ' + e.message);
+    }
+  };
+
+  const handleSeedKeyDates = async () => {
+    if (!window.confirm('This will reset all key dates to default values. Continue?')) return;
+    try {
+      await axios.post(`${API}/seed-key-dates`);
+      const response = await axios.get(`${API}/key-dates`);
+      setKeyDates(response.data);
+      alert('Key dates seeded successfully!');
+    } catch (e) {
+      alert('Error seeding: ' + e.message);
+    }
+  };
+
   const handleSchoolSelect = (slug) => {
     const school = schools.find(s => s.slug === slug);
     if (school) {
