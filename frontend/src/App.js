@@ -3836,6 +3836,14 @@ const AdminPage = () => {
             Data Sources ({scrapeSources.length})
           </button>
           <button
+            onClick={() => setActiveTab('keydates')}
+            className={`px-4 py-2 rounded-md font-medium transition-all ${
+              activeTab === 'keydates' ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+            }`}
+          >
+            Key Dates ({keyDates.length})
+          </button>
+          <button
             onClick={() => setActiveTab('contact')}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               activeTab === 'contact' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
@@ -3852,6 +3860,254 @@ const AdminPage = () => {
             Scrape Helper
           </button>
         </div>
+
+        {/* Key Dates Tab */}
+        {activeTab === 'keydates' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="font-heading text-xl font-semibold text-stone-900">Manage Key Dates</h2>
+                  <p className="text-stone-600 text-sm mt-1">Update Kent Test timeline and important dates</p>
+                </div>
+                <button
+                  onClick={handleSeedKeyDates}
+                  className="px-4 py-2 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200 transition-all"
+                >
+                  Reset to Defaults
+                </button>
+              </div>
+
+              {/* Add New Date Form */}
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-stone-900 mb-4">Add New Key Date</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Date (Display)</label>
+                    <input
+                      type="text"
+                      value={newKeyDate.date}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, date: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm"
+                      placeholder="e.g., 2 June 2025"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Date (ISO for sorting)</label>
+                    <input
+                      type="date"
+                      value={newKeyDate.date_iso}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, date_iso: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+                    <select
+                      value={newKeyDate.category}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, category: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm bg-white"
+                    >
+                      <option value="registration">Registration</option>
+                      <option value="exam">Exam</option>
+                      <option value="results">Results</option>
+                      <option value="application">Application</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      value={newKeyDate.title}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, title: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm"
+                      placeholder="e.g., Kent Test Registration Opens"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Year Cycle</label>
+                    <select
+                      value={newKeyDate.year_cycle}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, year_cycle: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm bg-white"
+                    >
+                      <option value="2025/2026">2025/2026</option>
+                      <option value="2026/2027">2026/2027</option>
+                      <option value="2027/2028">2027/2028</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Description</label>
+                    <textarea
+                      value={newKeyDate.description}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, description: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm resize-none"
+                      rows={2}
+                      placeholder="Detailed description..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">Source</label>
+                    <input
+                      type="text"
+                      value={newKeyDate.source}
+                      onChange={(e) => setNewKeyDate(prev => ({...prev, source: e.target.value}))}
+                      className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm"
+                      placeholder="e.g., Kent County Council"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={handleAddKeyDate}
+                  className="mt-4 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-all"
+                >
+                  Add Key Date
+                </button>
+              </div>
+
+              {/* Existing Dates List */}
+              <div className="space-y-3">
+                {keyDates.length === 0 ? (
+                  <div className="text-center py-8 text-stone-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No key dates found. Click "Reset to Defaults" to add initial dates.</p>
+                  </div>
+                ) : (
+                  keyDates.map(date => (
+                    <div key={date.id} className={`border rounded-lg p-4 ${
+                      editingKeyDate?.id === date.id ? 'border-amber-400 bg-amber-50' : 'border-stone-200'
+                    }`}>
+                      {editingKeyDate?.id === date.id ? (
+                        // Edit mode
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <input
+                              type="text"
+                              value={editingKeyDate.date}
+                              onChange={(e) => setEditingKeyDate(prev => ({...prev, date: e.target.value}))}
+                              className="px-3 py-2 border border-amber-300 rounded-lg text-sm"
+                              placeholder="Date display"
+                            />
+                            <input
+                              type="date"
+                              value={editingKeyDate.date_iso}
+                              onChange={(e) => setEditingKeyDate(prev => ({...prev, date_iso: e.target.value}))}
+                              className="px-3 py-2 border border-amber-300 rounded-lg text-sm"
+                            />
+                            <select
+                              value={editingKeyDate.category}
+                              onChange={(e) => setEditingKeyDate(prev => ({...prev, category: e.target.value}))}
+                              className="px-3 py-2 border border-amber-300 rounded-lg text-sm bg-white"
+                            >
+                              <option value="registration">Registration</option>
+                              <option value="exam">Exam</option>
+                              <option value="results">Results</option>
+                              <option value="application">Application</option>
+                            </select>
+                            <select
+                              value={editingKeyDate.year_cycle}
+                              onChange={(e) => setEditingKeyDate(prev => ({...prev, year_cycle: e.target.value}))}
+                              className="px-3 py-2 border border-amber-300 rounded-lg text-sm bg-white"
+                            >
+                              <option value="2025/2026">2025/2026</option>
+                              <option value="2026/2027">2026/2027</option>
+                            </select>
+                          </div>
+                          <input
+                            type="text"
+                            value={editingKeyDate.title}
+                            onChange={(e) => setEditingKeyDate(prev => ({...prev, title: e.target.value}))}
+                            className="w-full px-3 py-2 border border-amber-300 rounded-lg text-sm"
+                            placeholder="Title"
+                          />
+                          <textarea
+                            value={editingKeyDate.description}
+                            onChange={(e) => setEditingKeyDate(prev => ({...prev, description: e.target.value}))}
+                            className="w-full px-3 py-2 border border-amber-300 rounded-lg text-sm resize-none"
+                            rows={2}
+                          />
+                          <input
+                            type="text"
+                            value={editingKeyDate.source}
+                            onChange={(e) => setEditingKeyDate(prev => ({...prev, source: e.target.value}))}
+                            className="w-full px-3 py-2 border border-amber-300 rounded-lg text-sm"
+                            placeholder="Source"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleUpdateKeyDate}
+                              className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingKeyDate(null)}
+                              className="px-4 py-2 bg-stone-100 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-200"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        // View mode
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
+                                date.category === 'registration' ? 'bg-blue-100 text-blue-700' :
+                                date.category === 'exam' ? 'bg-purple-100 text-purple-700' :
+                                date.category === 'results' ? 'bg-green-100 text-green-700' :
+                                'bg-amber-100 text-amber-700'
+                              }`}>
+                                {date.category}
+                              </span>
+                              <span className="text-sm text-stone-500">{date.date}</span>
+                              <span className="text-xs text-stone-400">({date.year_cycle})</span>
+                            </div>
+                            <h4 className="font-semibold text-stone-900">{date.title}</h4>
+                            <p className="text-sm text-stone-600 mt-1">{date.description}</p>
+                            {date.source && (
+                              <p className="text-xs text-stone-400 mt-1">Source: {date.source}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <button
+                              onClick={() => setEditingKeyDate(date)}
+                              className="px-3 py-1.5 bg-stone-100 text-stone-700 rounded text-sm font-medium hover:bg-stone-200"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteKeyDate(date.id)}
+                              className="px-3 py-1.5 bg-red-100 text-red-700 rounded text-sm font-medium hover:bg-red-200"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Data Source Note */}
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-2">📌 Data Sources</h4>
+                <p className="text-sm text-blue-800">
+                  Key dates are primarily sourced from:
+                </p>
+                <ul className="text-sm text-blue-700 mt-2 space-y-1">
+                  <li>• <a href="https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test" target="_blank" rel="noopener noreferrer" className="underline">Kent County Council - Kent Test</a></li>
+                  <li>• <a href="https://www.gov.uk/schools-admissions" target="_blank" rel="noopener noreferrer" className="underline">Department for Education - School Admissions</a></li>
+                </ul>
+                <p className="text-xs text-blue-600 mt-3">
+                  💡 Check these sources annually (around May) for updated dates for the next academic year.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Schools Tab */}
         {activeTab === 'schools' && (
