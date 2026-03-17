@@ -129,6 +129,44 @@ class SchoolResponse(BaseModel):
 class CompareRequest(BaseModel):
     school_ids: List[str]
 
+# Key Date Model for Timeline
+class KeyDate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    date: str  # Human readable date e.g. "2 June 2025"
+    date_iso: str  # ISO format for sorting e.g. "2025-06-02"
+    title: str
+    description: str
+    category: str  # registration, exam, results, application
+    year_cycle: str = "2025/2026"  # Academic year cycle
+    source: str = ""  # Where the info came from
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class KeyDateCreate(BaseModel):
+    date: str
+    date_iso: str
+    title: str
+    description: str
+    category: str
+    year_cycle: str = "2025/2026"
+    source: str = ""
+
+class KeyDateResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str
+    date: str
+    date_iso: str
+    title: str
+    description: str
+    category: str
+    year_cycle: str
+    source: str
+    created_at: str
+    updated_at: str
+
 # Contact Query Model
 class ContactQuery(BaseModel):
     model_config = ConfigDict(extra="ignore")
