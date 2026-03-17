@@ -2186,93 +2186,36 @@ const IndependentSchoolsPage = () => {
 
 // Key Dates Page
 const KeyDatesPage = () => {
+  const [keyDates, setKeyDates] = useState([]);
+  const [loading, setLoading] = useState(true);
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+  today.setHours(0, 0, 0, 0);
   
-  // Important dates for Kent Test 2025/2026 cycle
-  const rawDates = [
-    {
-      id: 1,
-      date: "2 June 2025",
-      dateObj: new Date("2025-06-02"),
-      title: "Kent Test Registration Opens",
-      description: "Online registration opens for the September 2025 Kent Test",
-      category: "registration"
-    },
-    {
-      id: 2,
-      date: "1 July 2025",
-      dateObj: new Date("2025-07-01"),
-      title: "Kent Test Registration Closes",
-      description: "Deadline to register your child for the Kent Test. Late registrations may be accepted - contact kent.admissions@kent.gov.uk",
-      category: "registration"
-    },
-    {
-      id: 3,
-      date: "11 September 2025",
-      dateObj: new Date("2025-09-11"),
-      title: "Kent Test Takes Place",
-      description: "Children sit the Kent Test at designated test centres. Two papers: Reasoning (50 mins) and English & Maths (60 mins)",
-      category: "exam"
-    },
-    {
-      id: 4,
-      date: "16 October 2025",
-      dateObj: new Date("2025-10-16"),
-      title: "Kent Test Results Day",
-      description: "Results emailed to parents. Grammar threshold for 2025: total score of 332+ with no single score below 108",
-      category: "results"
-    },
-    {
-      id: 5,
-      date: "31 October 2025",
-      dateObj: new Date("2025-10-31"),
-      title: "Secondary School Application Deadline",
-      description: "Deadline to submit secondary school applications via your local authority. Name up to 4 school preferences",
-      category: "application"
-    },
-    {
-      id: 6,
-      date: "2 March 2026",
-      dateObj: new Date("2026-03-02"),
-      title: "National Offer Day",
-      description: "Secondary school places are offered. Check your email or local authority portal for your child's school allocation",
-      category: "results"
-    },
-    {
-      id: 7,
-      date: "16 March 2026",
-      dateObj: new Date("2026-03-16"),
-      title: "Appeal Deadline",
-      description: "Deadline to submit appeals if you wish to challenge your school allocation. Appeals heard by independent panels",
-      category: "application"
-    },
-    {
-      id: 8,
-      date: "1 May 2026",
-      dateObj: new Date("2026-05-01"),
-      title: "2026 Kent Test Details Released",
-      description: "Information and dates for the September 2026 Kent Test will be published on Kent County Council website",
-      category: "registration"
-    },
-    {
-      id: 9,
-      date: "1 June 2026",
-      dateObj: new Date("2026-06-01"),
-      title: "2026 Registration Opens",
-      description: "Registration opens for children entering Year 6 in September 2026 who wish to take the Kent Test",
-      category: "registration"
-    }
-  ];
+  useEffect(() => {
+    const fetchKeyDates = async () => {
+      try {
+        const response = await axios.get(`${API}/key-dates`);
+        setKeyDates(response.data);
+      } catch (e) {
+        console.error("Error fetching key dates:", e);
+        // Fallback to empty array
+        setKeyDates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchKeyDates();
+  }, []);
 
-  // Dynamically calculate status based on today's date
-  const keyDates = rawDates.map(event => ({
+  // Add status based on today's date
+  const processedDates = keyDates.map(event => ({
     ...event,
-    status: event.dateObj < today ? "completed" : "upcoming"
+    dateObj: new Date(event.date_iso),
+    status: new Date(event.date_iso) < today ? "completed" : "upcoming"
   }));
   
   // Find the next upcoming event
-  const nextUpcoming = keyDates.find(e => e.status === "upcoming");
+  const nextUpcoming = processedDates.find(e => e.status === "upcoming");
 
   const getStatusIcon = (status) => {
     if (status === "completed") return <CheckCircle className="h-5 w-5 text-green-600" />;
@@ -2289,13 +2232,24 @@ const KeyDatesPage = () => {
     }
   };
 
-  const upcomingEvents = keyDates.filter(d => d.status === "upcoming");
-  const completedEvents = keyDates.filter(d => d.status === "completed");
+  const upcomingEvents = processedDates.filter(d => d.status === "upcoming");
+  const completedEvents = processedDates.filter(d => d.status === "completed");
   
   // Format today's date for display
   const formatDate = (date) => {
     return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-stone-600">Loading key dates...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-8" data-testid="key-dates-page">
