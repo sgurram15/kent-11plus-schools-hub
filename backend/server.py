@@ -334,6 +334,17 @@ class ScrapeRequest(BaseModel):
     school_slug: str
     school_name: str
 
+# Key Dates Scrape Request Model
+class KeyDatesScrapeRequest(BaseModel):
+    url: Optional[str] = None
+    text: Optional[str] = None  # Paste raw page text here to bypass fetching the URL (e.g. for sites behind bot-protection)
+    year_cycle: str = "2025/2026"
+
+# Bulk Import Request Model for reviewed key dates
+class KeyDatesBulkImportRequest(BaseModel):
+    dates: List[KeyDateCreate]
+    replace_existing: bool = False
+
 # Seed data for all 32 Kent Grammar Schools with authentic GCSE results from GOV.UK 2025
 KENT_GRAMMAR_SCHOOLS = [
     {
@@ -2101,6 +2112,219 @@ async def seed_key_dates():
         await db.key_dates.insert_one(doc)
     
     return {"message": f"Seeded {len(initial_dates)} key dates successfully"}
+
+# Default source for the Kent Test key dates / admissions calendar
+KENT_KEY_DATES_URL = "https://www.kent.gov.uk/education-and-children/schools/school-places/kent-test/register-for-the-kent-test"
+
+# Keyword -> category mapping used to classify scraped key dates
+KEY_DATE_CATEGORY_KEYWORDS = [
+    ("registration", ["regist"]),
+    ("exam", ["kent test", "sit the test", "test takes place", "test date", "examination"]),
+    ("results", ["result", "offer day", "allocation", "email", "threshold"]),
+    ("application", ["applic", "appeal", "deadline", "preference"]),
+]
+
+MONTH_NAMES = (
+    "January|February|March|April|May|June|July|August|September|October|November|December"
+)
+
+
+def _guess_key_date_category(context: str) -> str:
+    lowered = context.lower()
+    for category, keywords in KEY_DATE_CATEGORY_KEYWORDS:
+        if any(keyword in lowered for keyword in keywords):
+            return category
+    return "registration"
+
+
+def _parse_date_to_iso(date_text: str) -> Optional[str]:
+    cleaned = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_text).strip()
+    for fmt in ("%d %B %Y", "%d %b %Y"):
+        try:
+            return datetime.strptime(cleaned, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return None
+
+
+def _extract_key_date_candidates(text_content: str, year_cycle: str, source_url: str) -> List[Dict[str, Any]]:
+    date_pattern = re.compile(
+        rf'\d{{1,2}}(?:st|nd|rd|th)?\s+(?:{MONTH_NAMES})\s+\d{{4}}',
+        re.IGNORECASE
+    )
+    # Matches date ranges like "12 and 13 September 2026" or "12-13 September 2026"
+    # so the start date isn't silently dropped by the single-date pattern above.
+    range_pattern = re.compile(
+        rf'\d{{1,2}}(?:st|nd|rd|th)?\s*(?:-|to|and)\s*(\d{{1,2}}(?:st|nd|rd|th)?\s+(?:{MONTH_NAMES})\s+\d{{4}})',
+        re.IGNORECASE
+    )
+
+    # Split into individual lines/sentences so each date's title/category is
+    # scoped to the row or sentence it actually appears in, instead of
+    # bleeding into neighbours. Real pages are often tables (one date per
+    # line, no punctuation) as well as prose (sentences ending in ".").
+    segments = re.split(r'[\r\n]+|(?<=[.!?])\s+', text_content)
+
+    candidates = []
+    seen_iso = set()
+
+    for segment in segments:
+        segment = segment.strip()
+        if not segment:
+            continue
+
+        # Handle "X and Y <Month> <Year>" ranges first, using the earlier day
+        # as the sort date but keeping the full range in the display text.
+        # Collect matches before mutating the segment, and strip every matched
+        # range out (regardless of dedup) so the single-date pass below never
+        # re-matches a trailing "<day> <Month> <Year>" from inside a range.
+        range_matches = list(range_pattern.finditer(segment))
+        for range_match in range_matches:
+            full_range_text = range_match.group(0)
+            end_date_text = range_match.group(1)
+            end_iso = _parse_date_to_iso(end_date_text)
+            if not end_iso:
+                continue
+            # Reuse the end date's month/year with the range's first day number.
+            first_day = re.match(r'\d{1,2}', full_range_text).group(0)
+            month_year = re.sub(r'^\d{1,2}(?:st|nd|rd|th)?\s+', '', end_date_text)
+            start_iso = _parse_date_to_iso(f"{first_day} {month_year}")
+            date_iso = start_iso or end_iso
+
+            if date_iso not in seen_iso:
+                before = segment[:range_match.start()].strip(" .:-–—")
+                after = segment[range_match.end():].strip(" .:-–—")
+                title_snippet = before or after
+                title = title_snippet[:80] if title_snippet else f"Key date: {full_range_text}"
+
+                seen_iso.add(date_iso)
+                candidates.append({
+                    "date": full_range_text,
+                    "date_iso": date_iso,
+                    "title": title,
+                    "description": segment[:300],
+                    "category": _guess_key_date_category(segment),
+                    "year_cycle": year_cycle,
+                    "source": source_url,
+                })
+
+        # Strip all matched ranges out (rightmost first to keep offsets valid)
+        # so the single-date pass below only sees dates outside any range.
+        for range_match in reversed(range_matches):
+            segment = segment[:range_match.start()] + segment[range_match.end():]
+
+        for match in date_pattern.finditer(segment):
+            date_text = match.group(0)
+            date_iso = _parse_date_to_iso(date_text)
+            if not date_iso or date_iso in seen_iso:
+                continue
+
+            # Prefer the part of the segment before the date as the title
+            # (e.g. "Registration closes" in "Registration closes 1 July 2025"),
+            # falling back to the part after it.
+            before = segment[:match.start()].strip(" .:-–—")
+            after = segment[match.end():].strip(" .:-–—")
+            title_snippet = before or after
+            title = title_snippet[:80] if title_snippet else f"Key date on {date_text}"
+
+            seen_iso.add(date_iso)
+            candidates.append({
+                "date": date_text,
+                "date_iso": date_iso,
+                "title": title,
+                "description": segment[:300],
+                "category": _guess_key_date_category(segment),
+                "year_cycle": year_cycle,
+                "source": source_url,
+            })
+
+    candidates.sort(key=lambda c: c["date_iso"])
+    return candidates[:30]
+
+
+@api_router.post("/scrape-key-dates")
+async def scrape_key_dates(request: KeyDatesScrapeRequest):
+    """
+    Extract candidate key dates either by fetching a URL, or from pasted page text
+    (useful when the source site blocks automated requests, e.g. Cloudflare's bot
+    challenge on kent.gov.uk). Returns raw extracted candidates for review - nothing
+    is saved to the database by this endpoint.
+    """
+    target_url = request.url or KENT_KEY_DATES_URL
+
+    # If raw text was pasted in, skip fetching entirely and extract directly from it.
+    if request.text and request.text.strip():
+        candidates = _extract_key_date_candidates(request.text, request.year_cycle, target_url)
+        return {
+            "success": True,
+            "url": target_url,
+            "candidates": candidates,
+            "count": len(candidates),
+            "message": "Dates extracted from pasted text. Please review before importing."
+        }
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(target_url, follow_redirects=True, headers={
+                "User-Agent": "Mozilla/5.0 (compatible; KentSchoolsHubBot/1.0)"
+            })
+            response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        text_content = soup.get_text(separator=' ', strip=True)
+
+        candidates = _extract_key_date_candidates(text_content, request.year_cycle, target_url)
+
+        return {
+            "success": True,
+            "url": target_url,
+            "candidates": candidates,
+            "count": len(candidates),
+            "message": "Dates extracted successfully. Please review before importing."
+        }
+
+    except httpx.HTTPError as e:
+        return {
+            "success": False,
+            "url": target_url,
+            "error": f"HTTP error: {str(e)}",
+            "message": "Failed to fetch the page automatically (the site may be blocking automated requests). Try pasting the page text instead."
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "url": target_url,
+            "error": str(e),
+            "message": "An error occurred while scraping. Please try again."
+        }
+
+
+@api_router.post("/key-dates/bulk-import")
+async def bulk_import_key_dates(request: KeyDatesBulkImportRequest):
+    """Save a reviewed batch of key dates (e.g. from scrape-key-dates) in one call."""
+    if request.replace_existing:
+        await db.key_dates.delete_many({})
+
+    imported = []
+    for item in request.dates:
+        date = KeyDate(
+            date=item.date,
+            date_iso=item.date_iso,
+            title=item.title,
+            description=item.description,
+            category=item.category,
+            year_cycle=item.year_cycle,
+            source=item.source
+        )
+        doc = date.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        # insert_one mutates its argument in place (adds a non-JSON-serializable
+        # ObjectId `_id`), so insert a copy and keep the clean dict for the response.
+        await db.key_dates.insert_one(dict(doc))
+        imported.append(doc)
+
+    return {"message": f"Imported {len(imported)} key dates successfully", "imported": imported}
 
 # Include the router in the main app
 app.include_router(api_router)

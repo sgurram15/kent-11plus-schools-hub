@@ -3352,6 +3352,19 @@ const ContactPage = () => {
   );
 };
 
+// Year cycles for the Key Dates admin forms, e.g. "2025/2026". Generated
+// (rather than hardcoded) so the range always extends a few years past
+// today without needing manual updates every year.
+const KEY_DATE_CYCLE_START_YEAR = 2025;
+const getYearCycleOptions = () => {
+  const endYear = Math.max(new Date().getFullYear() + 6, KEY_DATE_CYCLE_START_YEAR + 6);
+  const options = [];
+  for (let year = KEY_DATE_CYCLE_START_YEAR; year <= endYear; year++) {
+    options.push(`${year}/${year + 1}`);
+  }
+  return options;
+};
+
 // Admin Page for Managing Data
 const AdminPage = () => {
   const [schools, setSchools] = useState([]);
@@ -3429,6 +3442,14 @@ const AdminPage = () => {
     year_cycle: '2025/2026',
     source: ''
   });
+
+  // Key Dates scraping state
+  const [keyDateScrapeUrl, setKeyDateScrapeUrl] = useState('');
+  const [keyDatePastedText, setKeyDatePastedText] = useState('');
+  const [scrapingKeyDates, setScrapingKeyDates] = useState(false);
+  const [keyDateCandidates, setKeyDateCandidates] = useState([]);
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState([]);
+  const [importingKeyDates, setImportingKeyDates] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -3567,7 +3588,10 @@ const AdminPage = () => {
         year_cycle: editingKeyDate.year_cycle,
         source: editingKeyDate.source
       });
-      setKeyDates(prev => prev.map(d => d.id === editingKeyDate.id ? response.data : d));
+      setKeyDates(prev =>
+        prev.map(d => d.id === editingKeyDate.id ? response.data : d)
+            .sort((a, b) => a.date_iso.localeCompare(b.date_iso))
+      );
       setEditingKeyDate(null);
       alert('Key date updated!');
     } catch (e) {
@@ -3594,6 +3618,72 @@ const AdminPage = () => {
       alert('Key dates seeded successfully!');
     } catch (e) {
       alert('Error seeding: ' + e.message);
+    }
+  };
+
+  // Key Dates scraping handlers
+  const handleScrapeKeyDates = async (mode) => {
+    if (mode === 'text' && !keyDatePastedText.trim()) {
+      alert('Paste the page text first.');
+      return;
+    }
+    setScrapingKeyDates(true);
+    setKeyDateCandidates([]);
+    setSelectedCandidateIds([]);
+    try {
+      const response = await axios.post(`${API}/scrape-key-dates`, {
+        url: keyDateScrapeUrl || undefined,
+        text: mode === 'text' ? keyDatePastedText : undefined,
+      });
+      if (response.data.success) {
+        const candidates = (response.data.candidates || []).map((c, i) => ({ ...c, _id: i }));
+        setKeyDateCandidates(candidates);
+        setSelectedCandidateIds(candidates.map(c => c._id));
+        if (candidates.length === 0) {
+          alert('No dates found. You may need to add them manually.');
+        }
+      } else {
+        alert('Scrape failed: ' + (response.data.error || response.data.message));
+      }
+    } catch (e) {
+      alert('Error extracting key dates: ' + (e.response?.data?.detail || e.message));
+    } finally {
+      setScrapingKeyDates(false);
+    }
+  };
+
+  const handleToggleCandidate = (id) => {
+    setSelectedCandidateIds(prev =>
+      prev.includes(id) ? prev.filter(cid => cid !== id) : [...prev, id]
+    );
+  };
+
+  const handleCandidateFieldChange = (id, field, value) => {
+    setKeyDateCandidates(prev => prev.map(c => c._id === id ? { ...c, [field]: value } : c));
+  };
+
+  const handleImportSelectedKeyDates = async () => {
+    const toImport = keyDateCandidates.filter(c => selectedCandidateIds.includes(c._id));
+    if (toImport.length === 0) {
+      alert('Select at least one date to import.');
+      return;
+    }
+    setImportingKeyDates(true);
+    try {
+      const payload = {
+        dates: toImport.map(({ _id, ...rest }) => rest),
+        replace_existing: false,
+      };
+      await axios.post(`${API}/key-dates/bulk-import`, payload);
+      const response = await axios.get(`${API}/key-dates`);
+      setKeyDates(response.data);
+      setKeyDateCandidates(prev => prev.filter(c => !selectedCandidateIds.includes(c._id)));
+      setSelectedCandidateIds([]);
+      alert(`Imported ${toImport.length} key date(s) successfully!`);
+    } catch (e) {
+      alert('Error importing key dates: ' + (e.response?.data?.detail || e.message));
+    } finally {
+      setImportingKeyDates(false);
     }
   };
 
@@ -3931,9 +4021,9 @@ const AdminPage = () => {
                       onChange={(e) => setNewKeyDate(prev => ({...prev, year_cycle: e.target.value}))}
                       className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm bg-white"
                     >
-                      <option value="2025/2026">2025/2026</option>
-                      <option value="2026/2027">2026/2027</option>
-                      <option value="2027/2028">2027/2028</option>
+                      {getYearCycleOptions().map(cycle => (
+                        <option key={cycle} value={cycle}>{cycle}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="md:col-span-2">
@@ -3963,6 +4053,121 @@ const AdminPage = () => {
                 >
                   Add Key Date
                 </button>
+              </div>
+
+              {/* Scrape / Extract Key Dates From Website */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-stone-900 mb-1">Update Key Dates from the Website</h3>
+                <p className="text-stone-600 text-sm mb-4">
+                  Pulls out candidate dates for you to review before importing. Nothing is saved until you click "Import Selected".
+                </p>
+
+                <div className="flex flex-col md:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={keyDateScrapeUrl}
+                    onChange={(e) => setKeyDateScrapeUrl(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-stone-200 rounded-lg text-sm"
+                    placeholder="https://www.kent.gov.uk/.../register-for-the-kent-test (default if left blank)"
+                    data-testid="key-dates-scrape-url"
+                  />
+                  <button
+                    onClick={() => handleScrapeKeyDates('url')}
+                    disabled={scrapingKeyDates}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all disabled:opacity-50 whitespace-nowrap"
+                    data-testid="key-dates-scrape-button"
+                    title="Note: kent.gov.uk currently blocks automated fetches (Cloudflare). Use 'Paste Page Text' below instead."
+                  >
+                    {scrapingKeyDates ? 'Fetching...' : 'Fetch URL'}
+                  </button>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                    Or paste the page text (recommended for kent.gov.uk)
+                  </label>
+                  <p className="text-stone-500 text-xs mb-2">
+                    Open the Kent Test registration page in your own browser, select all the page text (Ctrl+A, Ctrl+C), and paste it below. This avoids the site's bot-protection, which blocks automatic fetching.
+                  </p>
+                  <textarea
+                    value={keyDatePastedText}
+                    onChange={(e) => setKeyDatePastedText(e.target.value)}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm resize-y"
+                    rows={6}
+                    placeholder="Paste the copied page text here..."
+                    data-testid="key-dates-paste-text"
+                  />
+                  <button
+                    onClick={() => handleScrapeKeyDates('text')}
+                    disabled={scrapingKeyDates}
+                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all disabled:opacity-50"
+                    data-testid="key-dates-extract-text-button"
+                  >
+                    {scrapingKeyDates ? 'Extracting...' : 'Extract Dates from Pasted Text'}
+                  </button>
+                </div>
+
+                {keyDateCandidates.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-stone-600">
+                        Found {keyDateCandidates.length} candidate date(s). Uncheck any that aren't relevant, edit as needed, then import.
+                      </p>
+                      <button
+                        onClick={handleImportSelectedKeyDates}
+                        disabled={importingKeyDates || selectedCandidateIds.length === 0}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-all disabled:opacity-50 whitespace-nowrap"
+                        data-testid="key-dates-import-button"
+                      >
+                        {importingKeyDates ? 'Importing...' : `Import Selected (${selectedCandidateIds.length})`}
+                      </button>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto space-y-2">
+                      {keyDateCandidates.map((candidate) => (
+                        <div key={candidate._id} className="flex items-start gap-3 border border-blue-200 bg-white rounded-lg p-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedCandidateIds.includes(candidate._id)}
+                            onChange={() => handleToggleCandidate(candidate._id)}
+                            className="mt-2"
+                          />
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <input
+                              type="date"
+                              value={candidate.date_iso}
+                              onChange={(e) => handleCandidateFieldChange(candidate._id, 'date_iso', e.target.value)}
+                              className="px-2 py-1 border border-stone-200 rounded text-sm"
+                            />
+                            <select
+                              value={candidate.category}
+                              onChange={(e) => handleCandidateFieldChange(candidate._id, 'category', e.target.value)}
+                              className="px-2 py-1 border border-stone-200 rounded text-sm bg-white"
+                            >
+                              <option value="registration">Registration</option>
+                              <option value="exam">Exam</option>
+                              <option value="results">Results</option>
+                              <option value="application">Application</option>
+                            </select>
+                            <input
+                              type="text"
+                              value={candidate.title}
+                              onChange={(e) => handleCandidateFieldChange(candidate._id, 'title', e.target.value)}
+                              className="md:col-span-2 px-2 py-1 border border-stone-200 rounded text-sm"
+                              placeholder="Title"
+                            />
+                            <textarea
+                              value={candidate.description}
+                              onChange={(e) => handleCandidateFieldChange(candidate._id, 'description', e.target.value)}
+                              className="md:col-span-4 px-2 py-1 border border-stone-200 rounded text-sm resize-none"
+                              rows={2}
+                              placeholder="Context / description"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Existing Dates List */}
@@ -4009,8 +4214,9 @@ const AdminPage = () => {
                               onChange={(e) => setEditingKeyDate(prev => ({...prev, year_cycle: e.target.value}))}
                               className="px-3 py-2 border border-amber-300 rounded-lg text-sm bg-white"
                             >
-                              <option value="2025/2026">2025/2026</option>
-                              <option value="2026/2027">2026/2027</option>
+                              {getYearCycleOptions().map(cycle => (
+                                <option key={cycle} value={cycle}>{cycle}</option>
+                              ))}
                             </select>
                           </div>
                           <input
