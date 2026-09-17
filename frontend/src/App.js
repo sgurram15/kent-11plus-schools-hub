@@ -2234,10 +2234,25 @@ const KeyDatesPage = () => {
 
   const upcomingEvents = processedDates.filter(d => d.status === "upcoming");
   const completedEvents = processedDates.filter(d => d.status === "completed");
-  
+
+  // Quick Info Card: derive the current cycle and its headline dates from
+  // the actual key dates data, instead of a hardcoded snapshot that goes
+  // stale every year.
+  const currentCycle = nextUpcoming?.year_cycle
+    || processedDates[processedDates.length - 1]?.year_cycle
+    || null;
+  const currentCycleDates = processedDates.filter(d => d.year_cycle === currentCycle);
+  const examDate = currentCycleDates.find(d => d.category === 'exam');
+  const resultsDate = currentCycleDates.find(d => d.category === 'results' && /result/i.test(d.title));
+  const offerDayDate = currentCycleDates.find(d => d.category === 'results' && /offer/i.test(d.title));
+
   // Format today's date for display
   const formatDate = (date) => {
     return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const formatDateShort = (date) => {
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   if (loading) {
@@ -2259,7 +2274,7 @@ const KeyDatesPage = () => {
           <h1 className="font-heading text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-2">
             Key Dates & Calendar
           </h1>
-          <p className="text-stone-600">Important dates for Kent 11+ admissions 2025/2026 cycle</p>
+          <p className="text-stone-600">Important dates for Kent 11+ admissions{currentCycle ? ` ${currentCycle} cycle` : ''}</p>
           <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
             <Clock className="h-4 w-4" />
             Today: {formatDate(today)}
@@ -2381,23 +2396,23 @@ const KeyDatesPage = () => {
             <div className="bg-primary text-white rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="h-6 w-6" />
-                <h3 className="font-heading text-xl font-semibold">2025/2026 Cycle</h3>
+                <h3 className="font-heading text-xl font-semibold">{currentCycle ? `${currentCycle} Cycle` : 'Kent Test Cycle'}</h3>
               </div>
               <p className="text-white/80 text-sm mb-4">
-                Key dates for children entering Year 7 in September 2026
+                Key dates for the {currentCycle || 'current'} Kent Test cycle
               </p>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-white/70">Test Date</span>
-                  <span className="font-semibold">Sept 2025</span>
+                  <span className="font-semibold">{examDate ? formatDateShort(examDate.dateObj) : 'TBC'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/70">Results</span>
-                  <span className="font-semibold">16 Oct 2025</span>
+                  <span className="font-semibold">{resultsDate ? formatDateShort(resultsDate.dateObj) : 'TBC'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/70">Offer Day</span>
-                  <span className="font-semibold">2 Mar 2026</span>
+                  <span className="font-semibold">{offerDayDate ? formatDateShort(offerDayDate.dateObj) : 'TBC'}</span>
                 </div>
               </div>
             </div>
