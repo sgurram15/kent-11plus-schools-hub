@@ -3412,6 +3412,10 @@ const AdminPage = () => {
     notes: '',
     source_url: ''
   });
+
+  // Event editing state
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [savingEvent, setSavingEvent] = useState(false);
   
   // Form states for new score
   const [newScore, setNewScore] = useState({
@@ -3869,6 +3873,36 @@ const AdminPage = () => {
       setEvents(events.filter(e => e.id !== eventId));
     } catch (e) {
       alert('Error deleting event: ' + e.message);
+    }
+  };
+
+  const handleEditEvent = (event) => {
+    setEditingEvent({ ...event });
+  };
+
+  const handleUpdateEvent = async () => {
+    if (!editingEvent) return;
+    setSavingEvent(true);
+    try {
+      const response = await axios.put(`${API}/open-events/${editingEvent.id}`, {
+        school_slug: editingEvent.school_slug,
+        school_name: editingEvent.school_name,
+        event_type: editingEvent.event_type,
+        event_date: editingEvent.event_date,
+        event_time: editingEvent.event_time,
+        headteacher_speaks: editingEvent.headteacher_speaks,
+        booking_required: editingEvent.booking_required,
+        booking_url: editingEvent.booking_url,
+        notes: editingEvent.notes,
+        source_url: editingEvent.source_url
+      });
+      setEvents(prev => prev.map(e => e.id === editingEvent.id ? response.data : e));
+      setEditingEvent(null);
+      alert('Event updated successfully!');
+    } catch (e) {
+      alert('Error updating event: ' + (e.response?.data?.detail || e.message));
+    } finally {
+      setSavingEvent(false);
     }
   };
 
@@ -5003,17 +5037,104 @@ const AdminPage = () => {
               <h2 className="font-heading text-xl font-semibold text-stone-900 mb-4">Existing Events</h2>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {events.map(event => (
-                  <div key={event.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-stone-900">{event.school_name}</p>
-                      <p className="text-sm text-stone-600">{event.event_type} - {event.event_date} @ {event.event_time}</p>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteEvent(event.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                  <div key={event.id} className={`p-3 rounded-lg border ${
+                    editingEvent?.id === event.id ? 'border-primary bg-primary/5' : 'border-transparent bg-stone-50'
+                  }`}>
+                    {editingEvent?.id === event.id ? (
+                      // Edit mode
+                      <div className="space-y-3">
+                        <p className="font-medium text-stone-900">{editingEvent.school_name}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <select
+                            value={editingEvent.event_type}
+                            onChange={(e) => setEditingEvent(prev => ({ ...prev, event_type: e.target.value }))}
+                            className="px-3 py-2 border border-stone-200 rounded-md text-sm bg-white"
+                          >
+                            <option>Open Evening</option>
+                            <option>Open Morning</option>
+                            <option>Year 5 Open Morning</option>
+                            <option>Sixth Form Options Evening</option>
+                            <option>School Tour</option>
+                            <option>Other</option>
+                          </select>
+                          <input
+                            type="text"
+                            value={editingEvent.event_date}
+                            onChange={(e) => setEditingEvent(prev => ({ ...prev, event_date: e.target.value }))}
+                            placeholder="Date, e.g. 24 September 2026"
+                            className="px-3 py-2 border border-stone-200 rounded-md text-sm"
+                          />
+                          <input
+                            type="text"
+                            value={editingEvent.event_time}
+                            onChange={(e) => setEditingEvent(prev => ({ ...prev, event_time: e.target.value }))}
+                            placeholder="Time, e.g. 4:30pm to 7:30pm"
+                            className="px-3 py-2 border border-stone-200 rounded-md text-sm"
+                          />
+                          <input
+                            type="text"
+                            value={editingEvent.headteacher_speaks || ''}
+                            onChange={(e) => setEditingEvent(prev => ({ ...prev, headteacher_speaks: e.target.value }))}
+                            placeholder="Headteacher speaks, e.g. 5:30pm and 6:30pm"
+                            className="px-3 py-2 border border-stone-200 rounded-md text-sm"
+                          />
+                          <input
+                            type="text"
+                            value={editingEvent.notes || ''}
+                            onChange={(e) => setEditingEvent(prev => ({ ...prev, notes: e.target.value }))}
+                            placeholder="Notes"
+                            className="md:col-span-2 px-3 py-2 border border-stone-200 rounded-md text-sm"
+                          />
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={!!editingEvent.booking_required}
+                              onChange={(e) => setEditingEvent(prev => ({ ...prev, booking_required: e.target.checked }))}
+                              className="rounded"
+                            />
+                            <label className="text-sm text-stone-700">Booking Required</label>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleUpdateEvent}
+                            disabled={savingEvent}
+                            className="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+                          >
+                            {savingEvent ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => setEditingEvent(null)}
+                            className="px-4 py-2 bg-stone-100 text-stone-700 rounded-md text-sm font-medium hover:bg-stone-200"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      // View mode
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-stone-900">{event.school_name}</p>
+                          <p className="text-sm text-stone-600">{event.event_type} - {event.event_date} @ {event.event_time}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditEvent(event)}
+                            className="px-3 py-1.5 bg-stone-100 text-stone-700 rounded text-sm font-medium hover:bg-stone-200"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded"
+                            title="Delete event"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
