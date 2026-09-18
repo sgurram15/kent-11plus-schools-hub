@@ -5030,6 +5030,16 @@ const AdminPage = () => {
               >
                 Add Event
               </button>
+              {!selectedSchool && (
+                <p className="mt-2 text-sm text-amber-600">
+                  Select a school in the "Select School" box above to enable this.
+                </p>
+              )}
+              {selectedSchool && !newEvent.event_date && (
+                <p className="mt-2 text-sm text-amber-600">
+                  Enter an event date above to enable this.
+                </p>
+              )}
             </div>
 
             {/* Events List */}
